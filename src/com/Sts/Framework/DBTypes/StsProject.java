@@ -4403,7 +4403,8 @@ public class StsProject extends StsMainObject implements ActionListener, Seriali
 			rotatedBoundingBox.adjustZTRange(unrotatedBoundingBox);
 			rotatedBoundingBox.niceAdjustZTScale(approxNumZTIncs);
 		}
-        adjustZDomainSupported(((StsBoundingBox) iterator.getLast()).getZDomainSupported());
+        if(hasUnrotatedObjects)
+            adjustZDomainSupported(((StsBoundingBox) iterator.getLast()).getZDomainSupported());
 		// rotatedBoundingBox.addUnrotatedBoundingBox(unrotatedBoundingBox);
 
 		if(!hasRotatedObjects && !hasUnrotatedObjects)

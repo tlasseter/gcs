@@ -851,7 +851,7 @@ public class CalendarParser
         Object result;
         try
         {
-            result = method.invoke(null, null);
+            result = method.invoke(null, (Object[])null);
         }
         catch(IllegalAccessException iae)
         {

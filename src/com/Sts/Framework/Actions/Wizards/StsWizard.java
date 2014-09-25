@@ -135,7 +135,6 @@ abstract public class StsWizard extends StsAction
 
     public boolean start()
     {
-
     	if(!initialize()) return false;
 		dialog.pack();
         dialog.setLocationRelativeTo(frame);
@@ -237,7 +236,7 @@ abstract public class StsWizard extends StsAction
         return gotoStep((StsWizardStep)steps.firstElement());
     }
 
-    private boolean initialize()
+    public boolean initialize()
     {
         if(steps == null || steps.size() == 0)
         {

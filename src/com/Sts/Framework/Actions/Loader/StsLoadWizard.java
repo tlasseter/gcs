@@ -66,7 +66,7 @@ abstract public class StsLoadWizard extends StsWizard
 	/** Sets up file name parsing */
 	abstract public void initializeNamesAndFilenameFilter();
 	/** called when wizard is started to initialize things like current directory location, etc. */
-	abstract public void initialize();
+	abstract public boolean initialize();
 	/** gets the importer for this wizard */
 	abstract public StsVectorSetImport getImporter(StsModel model, StsProgressPanel panel);
 

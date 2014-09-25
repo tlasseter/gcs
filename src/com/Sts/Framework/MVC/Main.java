@@ -868,6 +868,7 @@ public class Main
         while (n < nArgs)
         {
             String arg = args[n];
+        /*
             if (stringContainsString(arg, "workflow"))
             {
                 if(argStartsWith(arg, "-"))   // negative sign indicates they can view the contents but not run them.
@@ -880,6 +881,8 @@ public class Main
                 workflowClasses = (String[]) StsMath.arrayAddElement(workflowClasses, arg);
             }
             else if (argStartsWith(arg, "mainDebug"))
+        */
+            if (argStartsWith(arg, "mainDebug"))
             {
                 isDebug = true;
                 System.out.println("Debug is on.");

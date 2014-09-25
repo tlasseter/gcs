@@ -164,11 +164,11 @@ public class StsWin3d extends StsWin3dFull implements StsSerializable
              }
              workflowPanel = new StsWorkflowPanel(model, getActionManager(), selectedPlugIn, null);
              workflowPanel.setWorkflowPlugin(model.workflowPlugInNames[0]);
-
+/*
              tabbedPanels.add("Workflow", workflowPanel);
              tabbedPanels.add("Objects", objectTreePanel);
 			 tabbedPanels.add("DataFiles", dataFilesTreePanel);
-
+*/
              //            pane.add(multiSplitPane, BorderLayout.CENTER);
 
              // add help links
@@ -358,6 +358,7 @@ public class StsWin3d extends StsWin3dFull implements StsSerializable
          //        selectedPlugIn.addAdditionalToolbars(this);
          tabbedPanels.add("Workflow", workflowPanel);
          tabbedPanels.add("Objects", objectTreePanel);
+         tabbedPanels.add("DataFiles", dataFilesTreePanel);
          tabbedPanels.setSelectedIndex(0);
      }
 

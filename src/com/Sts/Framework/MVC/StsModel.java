@@ -35,7 +35,9 @@ import java.awt.event.*;
 import java.beans.*;
 import java.io.*;
 import java.lang.reflect.*;
+import java.net.URL;
 import java.util.*;
+import java.util.List;
 import java.util.prefs.*;
 
 /**
@@ -91,7 +93,7 @@ public class StsModel extends StsSerialize
 	/** plug-in for the workflow process for this model */
 	transient public String[] workflowPlugInNames;
 	/** plug-in for the workflow process for this model */
-	transient public Boolean[] workflowPlugInStatus;
+	transient public boolean[] workflowPlugInStatus;
 	/** the principle 3d window where action takes place */
 	transient public StsWin3d win3d = null;
 	/** convenience copy of objectTreePanel; this can be set explicitly in testing the objectTreePanel */
@@ -1038,43 +1040,23 @@ public class StsModel extends StsSerialize
 		spectrumClass.createSpectrums();
 	}
 
-	/** load the default plug-in(s) */
+	/** load the available Workflow plug-in(s). A workflow plug-in must be in the package "com.Sts.PlugIns" and end with "Workflow".
+     *  For example: com.Sts.PlugIns.Model.Workflows.StsModelConstructionWorkflow. Note that the "Workflows" subpackage name is optional but organizationally useful.
+     *  Beginning with the rootPackageName "com.Sts.PlugIns", this method searches for all "*.class" files ending with "Workflow.class"
+     *  and returns a list of all classNames that meet these requirements.  These classes are then loaded and the list of classNames are saved */
 	private void loadWorkflowPlugIn()
 	{
-		ArrayList plugIns = new ArrayList();
-		// String workflowsPackageName = "com.Sts.Workflows";
-
 		try
 		{
-			if(Main.workflowClasses == null)
-			{
-				StsException.systemError("StsModel.loadkWorkflowPlugIn() failed: no workflow plugins names were defined in arguments list.");
-				return;
-			}
+            String rootPackageName = "com.Sts.PlugIns";
+            String ending = "Workflow";
+            List<String> workflowClassNamesList = new ArrayList<>();
+            getClassNamesEndingWith(rootPackageName, ending, workflowClassNamesList);
+            workflowPlugInNames = workflowClassNamesList.toArray(new String[0]);
+            workflowPlugInStatus = new boolean[workflowPlugInNames.length];
+            Arrays.fill(workflowPlugInStatus, true);
 
-			ClassLoader classLoader = getClass().getClassLoader();
-
-			workflowPlugInNames = new String[0];
-			workflowPlugInStatus = new Boolean[0];
-			String[] workflowClasses = Main.workflowClasses;
-			int nWorkflowClasses = workflowClasses.length;
-			for(int n = 0; n < nWorkflowClasses; n++)
-			{
-				String plugInName = workflowClasses[n];
-				try
-				{
-					Class plugInClass = classLoader.loadClass(plugInName);
-					workflowPlugInNames = (String[]) StsMath.arrayAddElement(workflowPlugInNames, plugInName);
-					workflowPlugInStatus = (Boolean[]) StsMath.arrayAddElement(workflowPlugInStatus, Main.workflowStatus[n]);
-				}
-				catch(Exception e)
-				{
-					new StsMessage(this.win3d, StsMessage.WARNING, "Failed to find workflow plug-in: " + plugInName);
-				}
-			}
-
-			int nWorkflowPlugIns = workflowPlugInNames.length;
-			if(nWorkflowPlugIns == 0)
+			if(workflowPlugInNames.length == 0)
 			{
 				new StsMessage(this.win3d, StsMessage.WARNING, "Failed to find any workflow plug-ins.");
 				return;
@@ -1085,25 +1067,63 @@ public class StsModel extends StsSerialize
 			// load the last userPrefPlugIn or if not found, load the first available plugin
 			if(userPrefPlugIn != null)
 			{
-				for(int n = 0; n < nWorkflowPlugIns; n++)
+				for(String workflowPlugInName : workflowPlugInNames)
 				{
-					if(workflowPlugInNames[n].indexOf(userPrefPlugIn) != -1 && loadWorkflowPlugIn(workflowPlugInNames[n]))
-					{
+					if(workflowPlugInName.indexOf(userPrefPlugIn) != -1 && loadWorkflowPlugIn(workflowPlugInName))
 						return;
-					}
 				}
 			}
 			// if selected workflow fails to load, load the first available one
-			for(int n = 0; n < nWorkflowPlugIns; n++)
-			{
-				if(loadWorkflowPlugIn(workflowPlugInNames[n])) return;
-			}
+			for(String workflowPlugInName : workflowPlugInNames)
+				if(loadWorkflowPlugIn(workflowPlugInName)) return;
 		}
 		catch(Exception e)
 		{
 			StsException.outputException("StsModel.loadWorkflowPlugIn() failed.", e, StsException.WARNING);
 		}
 	}
+
+    private static void getClassNamesEndingWith(String parentPackageName, String ending, List<String> classNames) throws ClassNotFoundException, IOException
+    {
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        assert classLoader != null;
+        String path = parentPackageName.replace('.', '/');
+        Enumeration<URL> resources = classLoader.getResources(path);
+        List<File> dirs = new ArrayList<>();
+        while (resources.hasMoreElements())
+        {
+            URL resource = resources.nextElement();
+            dirs.add(new File(resource.getFile()));
+        }
+        for (File directory : dirs)
+            getClassNamesEndingWith(directory, parentPackageName, ending, classNames);
+    }
+    /**
+     * Recursive method used to find all classes in a given directory and subdirs.
+     *  @param directory   The base directory
+     * @param parentPackageName
+     * @param classNames   @return The classes
+     * @throws ClassNotFoundException
+     */
+    private static void getClassNamesEndingWith(File directory, String parentPackageName, String ending, List<String> classNames) throws ClassNotFoundException
+    {
+        if (!directory.exists()) return;
+
+        File[] files = directory.listFiles();
+        for (File file : files)
+        {
+            if (file.isDirectory())
+            {
+                String dirName = file.getName();
+                if(!dirName.contains("."))
+                    getClassNamesEndingWith(file, parentPackageName + "." + dirName, ending, classNames);
+            }
+            else if (file.getName().endsWith(ending + ".class"))
+            {
+                classNames.add(parentPackageName + "." + file.getName().substring(0, file.getName().length() - 6));
+            }
+        }
+    }
 
 	// Needed on open or creation of new project to kill time Thread if still running.
 	public boolean stopTime()

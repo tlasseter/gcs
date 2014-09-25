@@ -261,10 +261,10 @@ public class StsWorkflowPanel extends StsJPanel
             if((model.workflowPlugInNames == null) || (workflowsBean == null))
             	return;
             int workflowIndex = workflowsBean.getSelectedIndex();
-            selectedPluginStatus = model.workflowPlugInStatus[workflowIndex].booleanValue();
+            selectedPluginStatus = model.workflowPlugInStatus[workflowIndex];
             Class plugInClass = classLoader.loadClass(model.workflowPlugInNames[workflowIndex]);
-            Constructor constructor = plugInClass.getConstructor(new Class[0]);
-            StsWorkflow selectedPlugIn = (StsWorkflow)constructor.newInstance(new Object[]{new Class[0]});
+            Constructor constructor = plugInClass.getConstructor();
+            StsWorkflow selectedPlugIn = (StsWorkflow)constructor.newInstance();
             model.setWorkflowPlugIn(selectedPlugIn);
             updateDetails(actionManager.getModel().getWorkflowPlugIn().getDescription());
         }

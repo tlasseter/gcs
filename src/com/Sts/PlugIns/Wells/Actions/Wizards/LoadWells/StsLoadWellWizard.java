@@ -168,8 +168,9 @@ public class StsLoadWellWizard extends StsLoadWizard
 		}
 	}
 
-    public void initialize()
+    public boolean initialize()
     {
+        return true;
     }
 
 	public void next()
