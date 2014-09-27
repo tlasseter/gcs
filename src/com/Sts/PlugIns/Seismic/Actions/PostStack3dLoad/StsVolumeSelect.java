@@ -12,7 +12,7 @@ import com.Sts.Framework.Actions.Wizards.*;
 import com.Sts.Framework.Actions.Wizards.WizardHeaders.*;
 import com.Sts.Framework.IO.*;
 
-public class StsVolumeSelect extends StsWizardStep
+public class StsVolumeSelect extends StsWizardStep implements Runnable
 {
     StsVolumeSelectPanel panel;
     StsHeaderPanel header;

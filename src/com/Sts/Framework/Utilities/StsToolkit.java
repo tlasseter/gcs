@@ -1817,8 +1817,9 @@ public class StsToolkit
     public static String getSimpleClassname(Class c)
     {
         if(c == null) return "Null";
-        String classname = c.getName();
-		return getSimpleClassname(classname);
+        return c.getSimpleName();
+        //String classname = c.getName();
+		//return getSimpleClassname(classname);
 	}
 
 	public static String getSimpleClassname(String classname)

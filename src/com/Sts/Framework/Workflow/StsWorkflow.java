@@ -21,7 +21,7 @@ import com.Sts.Framework.Workflow.*;
 public class StsWorkflow
 {
     public String name = "com.Sts.MVC.StsMain";
-    public String workflowName = "Default";
+    public String workflowName = "StsMain";
     public String description = "None";
 
     protected StsTreeModel treeModel;
@@ -127,6 +127,7 @@ public class StsWorkflow
     public StsWorkflow()
     {
         name = getClass().getName();
+        workflowName = StsToolkit.getSimpleClassname(name);
     }
 
     public String getDescription()

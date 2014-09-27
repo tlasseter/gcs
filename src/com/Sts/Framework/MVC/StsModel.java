@@ -1325,10 +1325,10 @@ public class StsModel extends StsSerialize
     */
 	public void setWorkflowPlugIn(StsWorkflow workflowPlugIn)
 	{
+        Preferences prefs = Preferences.userNodeForPackage(getClass());
+        prefs.put(WORKFLOW_PLUGIN, workflowPlugIn.name);
 		if(this.workflowPlugIn == workflowPlugIn) return;
 		this.workflowPlugIn = workflowPlugIn;
-		Preferences prefs = Preferences.userNodeForPackage(getClass());
-		prefs.put(WORKFLOW_PLUGIN, workflowPlugIn.name);
 		if(win3d != null) win3d.rebuildWorkflow(workflowPlugIn);
 	}
 
