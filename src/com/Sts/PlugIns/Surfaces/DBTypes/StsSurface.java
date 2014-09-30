@@ -469,7 +469,7 @@ public class StsSurface extends StsRotatedGridBoundingBox implements StsSelectab
         this.zDomainOriginal = zDomain;
         this.zDomainSupported = zDomainSupported;
 
-        if (!checkGrid(currentModel.win3d)) return false;
+        if (!checkGrid()) return false;
 
 		StsProject project = currentModel.getProject();
 		if(!project.rotatedBoundingBox.isXYCongruent(this))
@@ -1302,7 +1302,7 @@ public class StsSurface extends StsRotatedGridBoundingBox implements StsSelectab
         prefixString = s;
     }
 
-    protected boolean checkGrid(StsWin3d win3d)
+    public boolean checkGrid()
     {
         initNonNullRange();
 
@@ -1365,7 +1365,7 @@ public class StsSurface extends StsRotatedGridBoundingBox implements StsSelectab
         this.nullZValue = surface.nullZValue;
         this.pointsZ = new float[nRows][nCols];
         this.pointsNull = new byte[nRows][nCols];
-        if (!checkGrid(currentModel.win3d))
+        if (!checkGrid())
         {
             return null;
         }

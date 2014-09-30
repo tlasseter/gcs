@@ -25,7 +25,7 @@ import java.nio.*;
 import java.text.*;
 import java.util.*;
 
-public abstract class StsVirtualVolume extends StsSeismicVolume implements StsTreeObjectI
+public abstract class StsVirtualSeismicVolume extends StsSeismicVolume implements StsTreeObjectI
 {
     protected boolean dataRangeChanged = false;
     public StsObjectRefList volumes = null;
@@ -42,11 +42,11 @@ public abstract class StsVirtualVolume extends StsSeismicVolume implements StsTr
     transient public static final String[] TYPE_STRINGS = { "Math", "Blended", "Crossplot", "Filters", "EPFilter", "Color", "Sensor"};
     transient public int[] nRowCols = new int[2];
 
-    public StsVirtualVolume()
+    public StsVirtualSeismicVolume()
     {
         System.out.println("VirtualVolume constructor called.");
     }
-    public StsVirtualVolume(boolean persistent)
+    public StsVirtualSeismicVolume(boolean persistent)
     {
         super(persistent);
 	}
@@ -78,7 +78,7 @@ public abstract class StsVirtualVolume extends StsSeismicVolume implements StsTr
         }
         catch (Exception e)
         {
-            StsException.outputException("StsVirtualVolume.classInitialize() failed.",
+            StsException.outputException("StsVirtualSeismicVolume.classInitialize() failed.",
                                          e, StsException.WARNING);
             return false;
         }
@@ -97,7 +97,7 @@ public abstract class StsVirtualVolume extends StsSeismicVolume implements StsTr
         return true;
     }
 
-    /** copy routine copies StsSeismicVolume to StsVirtualVolume, but these members should be nulled. */
+    /** copy routine copies StsSeismicVolume to StsVirtualSeismicVolume, but these members should be nulled. */
 	public void clearNonRelevantMembers()
 	{
 		rowFloatFilename = null;
@@ -116,7 +116,7 @@ public abstract class StsVirtualVolume extends StsSeismicVolume implements StsTr
 
     static public StsVirtualVolumeClass getVirtualVolumeClass()
     {
-        return (StsVirtualVolumeClass) currentModel.getCreateStsClass(StsVirtualVolume.class);
+        return (StsVirtualVolumeClass) currentModel.getCreateStsClass(StsVirtualSeismicVolume.class);
     }
 
     static public StsVirtualVolumeClass getVirtualVolumeClass(StsObject object)

@@ -854,6 +854,12 @@ class StsWorkflowTreeNodeEditor extends StsAbstractCellEditor
             return;
         }
         Class actionClass = lastEditedNode.getActionClass();
+        if(actionClass == null)
+        {
+            new StsMessage(null, StsMessage.WARNING, "Failed to find actionClass " + lastEditedNode.actionClassname);
+            Toolkit.getDefaultToolkit().beep();
+            return;
+        }
         int actionType = lastEditedNode.getActionType();
         int actionStatus = lastEditedNode.getActionStatus();
         if(workflowPanel.selectedPluginStatus == false)

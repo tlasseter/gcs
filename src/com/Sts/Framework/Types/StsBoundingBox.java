@@ -220,7 +220,7 @@ public class StsBoundingBox extends StsMainObject implements Cloneable, Serializ
     public boolean initializedZ() { return zMin != largeFloat; }
     public boolean initializedT() { return tMin != largeFloat; }
 
-    /** Initialize the origin from this boundingBox if it has been set. */
+    /** Initialize the this origin from this boundingBox if this origin has not set and boundingBox has been set. */
     public void checkSetOrigin(StsBoundingBox boundingBox)
     {
         if(originSet || !boundingBox.originSet) return;
@@ -240,6 +240,7 @@ public class StsBoundingBox extends StsMainObject implements Cloneable, Serializ
         resetRanges();
     }
 
+    /** initialize this origin to given values */
     public void initializeOrigin(double xOrigin, double yOrigin)
     {
         this.xOrigin = xOrigin;
@@ -1735,4 +1736,9 @@ public class StsBoundingBox extends StsMainObject implements Cloneable, Serializ
     }
 
 	public float[] getLocalOrigin() { return new float[] { xMin, yMin };  }
+
+    public String getZDomainString()
+    {
+        return StsParameters.getZDomainString(this.zDomainByte );
+    }
 }

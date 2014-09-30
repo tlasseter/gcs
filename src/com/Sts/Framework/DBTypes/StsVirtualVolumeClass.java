@@ -19,7 +19,7 @@ import com.Sts.PlugIns.Seismic.Views.*;
 
 public class StsVirtualVolumeClass extends StsSeismicVolumeClass implements StsSerializable, StsClassSurfaceDisplayable, StsClassCursor3dTextureDisplayable //, StsClassDisplayable
 {
-    static public StsVirtualVolume currentVirtualVolumeObject = null;
+    static public StsVirtualSeismicVolume currentVirtualVolumeObject = null;
 /*
     static final Class[] subClassClasses = new Class[] { StsMathVirtualVolume.class, StsCrossplotVirtualVolume.class,
         StsRGBAVirtualVolume.class, StsFilterVirtualVolume.class, StsBlendedVirtualVolume.class, StsSensorVirtualVolume.class};
@@ -47,27 +47,27 @@ public class StsVirtualVolumeClass extends StsSeismicVolumeClass implements StsS
         subClasses = (StsVirtualVolumeClass[])StsMath.trimArray(subClasses, nActualInstances);
     }
 */
-    public StsVirtualVolume[] getVirtualVolumes()
+    public StsVirtualSeismicVolume[] getVirtualVolumes()
     {
         Object virtualVolumeList;
-        StsVirtualVolume[] virtualVolumes = new StsVirtualVolume[0];
+        StsVirtualSeismicVolume[] virtualVolumes = new StsVirtualSeismicVolume[0];
 
-        if(subClasses == null) return new StsVirtualVolume[0];
+        if(subClasses == null) return new StsVirtualSeismicVolume[0];
         for(StsClass subClass : subClasses)
         {
             virtualVolumeList = subClass.getCastObjectList();
-            virtualVolumes = (StsVirtualVolume[]) StsMath.arrayAddArray(virtualVolumes, virtualVolumeList);
+            virtualVolumes = (StsVirtualSeismicVolume[]) StsMath.arrayAddArray(virtualVolumes, virtualVolumeList);
         }
         return virtualVolumes;
     }
     
-    public StsVirtualVolume getVirtualVolumeWithName(String name)
+    public StsVirtualSeismicVolume getVirtualVolumeWithName(String name)
     {
-        StsVirtualVolume volume = null;
+        StsVirtualSeismicVolume volume = null;
         if(subClasses == null) return volume;
         for(StsClass subClass : subClasses)
         {
-            volume = (StsVirtualVolume) subClass.getObjectWithName(name);
+            volume = (StsVirtualSeismicVolume) subClass.getObjectWithName(name);
             if(volume != null) break;
         }
         return volume;
@@ -91,7 +91,7 @@ public class StsVirtualVolumeClass extends StsSeismicVolumeClass implements StsS
             vvClass.setContourColors(contour);
         }
     }
-    public void selected(StsVirtualVolume virtualVolume)
+    public void selected(StsVirtualSeismicVolume virtualVolume)
     {
         super.selected(virtualVolume);
         setCurrentObject(virtualVolume);
@@ -104,7 +104,7 @@ public class StsVirtualVolumeClass extends StsSeismicVolumeClass implements StsS
 
     public boolean setCurrentObject(StsObject object)
     {
-        currentVirtualVolumeObject = (StsVirtualVolume)object;
+        currentVirtualVolumeObject = (StsVirtualSeismicVolume)object;
         return super.setCurrentObject(object);
     }
 
@@ -152,7 +152,7 @@ public class StsVirtualVolumeClass extends StsSeismicVolumeClass implements StsS
 
     public StsCursor3dTexture constructDisplayableSection(StsModel model, StsCursor3d cursor3d, int dir)
     {
-        return new StsSeismicCursorSection(model, (StsVirtualVolume)currentObject, cursor3d, dir);
+        return new StsSeismicCursorSection(model, (StsVirtualSeismicVolume)currentObject, cursor3d, dir);
     }
 
 	public void setDisplayOnSubVolumes(boolean displayOnSubVolumes)

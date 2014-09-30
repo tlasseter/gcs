@@ -60,7 +60,7 @@ abstract public class StsWizard extends StsAction
             isTest = true;
         }
         constructDialog();
-        enableFinish();
+        disableFinish();
     }
 
     public StsWizard(StsActionManager actionManager, int width, int height)

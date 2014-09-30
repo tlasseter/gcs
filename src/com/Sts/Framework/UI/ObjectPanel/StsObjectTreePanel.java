@@ -643,7 +643,7 @@ public class StsObjectTreePanel extends JPanel implements ChangeListener // , Ac
 		 // Constructed Objects from other objects
 		 StsTreeNode crossplotNode = StsTreeNode.constructDynamicNode(model.getCreateStsClass(StsCrossplot.class), "Cross Plots");
 		 dataNode.add(crossplotNode);
-		 StsTreeNode virtualVolumesNode = StsTreeNode.constructDynamicNode(model.getCreateStsClass(StsVirtualVolume.class), "Virtual Volumes");
+		 StsTreeNode virtualVolumesNode = StsTreeNode.constructDynamicNode(model.getCreateStsClass(StsVirtualSeismicVolume.class), "Virtual Volumes");
 		 dataNode.add(virtualVolumesNode);
 
 		 StsTreeNode dataSubVolumeNode = StsTreeNode.staticNode(null, "SubVolumes");

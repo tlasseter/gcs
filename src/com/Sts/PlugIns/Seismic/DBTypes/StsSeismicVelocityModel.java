@@ -599,7 +599,7 @@ public class StsSeismicVelocityModel extends StsSeismicBoundingBox implements Ac
 	private void setTextureDisplays()
 	{
 		( (StsSeismicVolumeClass) currentModel.getStsClass(StsSeismicVolume.class)).setIsVisibleOnCursor(false);
-		( (StsVirtualVolumeClass) currentModel.getStsClass(StsVirtualVolume.class)).setIsVisibleOnCursor(false);
+		( (StsVirtualVolumeClass) currentModel.getStsClass(StsVirtualSeismicVolume.class)).setIsVisibleOnCursor(false);
 		getStsClass().setIsVisible(true);
 	}
 
@@ -2065,7 +2065,7 @@ public class StsSeismicVelocityModel extends StsSeismicBoundingBox implements Ac
 		}
 		catch (Exception e)
 		{
-			StsException.outputException("StsVirtualVolume.allocateVolumes() failed.",
+			StsException.outputException("StsVirtualSeismicVolume.allocateVolumes() failed.",
 										 e, StsException.WARNING);
 			return false;
 		}

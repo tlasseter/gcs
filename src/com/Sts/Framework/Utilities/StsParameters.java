@@ -556,6 +556,14 @@ public class StsParameters
         return TD_NONE;
     }
 
+    static public String getZDomainString(byte zDomainByte)
+    {
+        if(zDomainByte < 0 || zDomainByte >= TD_ALL_STRINGS.length)
+            return TD_NONE_STRING;
+        else
+            return TD_ALL_STRINGS[zDomainByte];
+    }
+
     static public String[] getSupportedDomainStrings(byte zDomain)
     {
         switch(zDomain)

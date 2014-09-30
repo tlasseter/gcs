@@ -349,11 +349,9 @@ public class StsWin3d extends StsWin3dFull implements StsSerializable
 
      public void rebuildWorkflow(StsWorkflow selectedPlugIn)
      {
-         if ((selectedPlugIn == null) || (workflowPanel == null))
-             return;
+         if (selectedPlugIn == null) return;
          tabbedPanels.remove(workflowPanel);
          tabbedPanels.remove(objectTreePanel);
-         workflowPanel = null;
          workflowPanel = new StsWorkflowPanel(model, getActionManager(), selectedPlugIn, null);
          //        selectedPlugIn.addAdditionalToolbars(this);
          tabbedPanels.add("Workflow", workflowPanel);

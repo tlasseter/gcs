@@ -1327,7 +1327,7 @@ public class StsModel extends StsSerialize
 	{
         Preferences prefs = Preferences.userNodeForPackage(getClass());
         prefs.put(WORKFLOW_PLUGIN, workflowPlugIn.name);
-		if(this.workflowPlugIn == workflowPlugIn) return;
+		if(this.workflowPlugIn.name.equals(workflowPlugIn.name)) return;
 		this.workflowPlugIn = workflowPlugIn;
 		if(win3d != null) win3d.rebuildWorkflow(workflowPlugIn);
 	}
@@ -1788,7 +1788,7 @@ public class StsModel extends StsSerialize
 		}
 	}
 
-	/** newVolume could be an StsSeismicVolume or an StsVirtualVolume */
+	/** newVolume could be an StsSeismicVolume or an StsVirtualSeismicVolume */
 	public void toggleOnCursor3dObject(StsObject newVolume)
 	{
 		for(StsWindowFamily windowFamily : getWindowFamilies())

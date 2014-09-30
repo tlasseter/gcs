@@ -1816,8 +1816,7 @@ public class StsToolkit
 
     public static String getSimpleClassname(Class c)
     {
-        if(c == null) return "Null";
-        else return c.getSimpleName();
+        return  (c == null) ? "Null" : c.getSimpleName();
 	}
 
 	public static String getSimpleClassname(String classname)
@@ -2151,7 +2150,7 @@ public class StsToolkit
         /*
         beep();
               StsSeismicVolume volume = new StsSeismicVolume();
-              StsVirtualVolume virtualVolume = new StsVirtualVolume();
+              StsVirtualSeismicVolume virtualVolume = new StsVirtualSeismicVolume();
               StsToolkit.copyDifferentClasses(volume, virtualVolume);
               System.out.println("done");
         */

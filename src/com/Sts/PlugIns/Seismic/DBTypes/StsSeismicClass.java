@@ -17,8 +17,8 @@ import com.Sts.Framework.Types.*;
 
 abstract public class StsSeismicClass extends StsObjectPanelClass implements StsSerializable, StsTreeObjectI, StsClassSurfaceDisplayable, StsRotatedClass
 {
-	transient protected StsRotatedGridBoundingBox volume;
-	transient protected StsRotatedGridBoundingBox cropVolume;
+	// transient protected StsRotatedGridBoundingBox volume;
+	// transient protected StsRotatedGridBoundingBox cropVolume;
 
 	protected boolean isPixelMode = false; // Blended Pixels or Nearest
 	protected boolean contourColors = true; // shader

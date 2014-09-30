@@ -17,7 +17,7 @@ import com.Sts.Framework.Utilities.*;
  */
 
 /** StsBlocksMemoryManager is a singleton (currently in StsProject) and a static in StsFileBlocks which manages all
- *  StsFileBlocks volumes from StsSeismicVolume, StsVirtualVolume, StsPreStackLineSet3d, and StsVolumeConstructor
+ *  StsFileBlocks volumes from StsSeismicVolume, StsVirtualSeismicVolume, StsPreStackLineSet3d, and StsVolumeConstructor
  *  (and any others).  When we wish to delete a block, we call this with the fileMappedBlocks from the calling
  *  class and the block in that blocks collection to be deleted.  These are matched up here, the block is deleted, and
  *  then the fileMappedBlocks itself is called to remove the block there.  Don't call StsFileMappedBlocks

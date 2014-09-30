@@ -4,6 +4,7 @@ import com.Sts.Framework.DBTypes.*;
 import com.Sts.Framework.Interfaces.*;
 import com.Sts.Framework.MVC.*;
 import com.Sts.Framework.MVC.Views.*;
+import com.Sts.Framework.UI.StsMessage;
 import com.Sts.Framework.Utilities.*;
 
 import java.io.*;
@@ -2426,7 +2427,6 @@ public class StsRotatedGridBoundingBox extends StsRotatedBoundingBox implements 
         {
         }
     }
-
 
     public static void main(String[] args)
     {

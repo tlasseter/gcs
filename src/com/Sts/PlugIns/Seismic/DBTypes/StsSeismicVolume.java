@@ -480,12 +480,6 @@ public class StsSeismicVolume extends StsSeismic implements StsTreeObjectI, StsV
         return;
     }
 
-    public void addToModel()
-    {
-        super.addToModel();
-        currentModel.checkAddToCursor3d(this);
-    }
-
     public boolean getIsPixelMode()
     {
         return getSeismicVolumeClass().getIsPixelMode();
