@@ -29,15 +29,15 @@ public class StsFloatDbVector extends StsAbstractFloatVector implements Cloneabl
     {
 		super(false);
 		this.name = name;
-		this.capacity = capacity;
-		this.growInc =  10;
+		this.capacity = 0;
+		this.growInc =  capacity;
     }
 
 	public StsFloatDbVector(int capacity)
 	{
 		super(false);
-		this.capacity = capacity;
-		this.growInc =  10;
+		this.capacity = 0;
+		this.growInc =  capacity;
 	}
 
     public StsFloatDbVector(String name, float[] values)

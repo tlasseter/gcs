@@ -1,9 +1,8 @@
-package com.Sts.PlugIns.GeoModels.Actions.Wizards;
+package com.Sts.PlugIns.GeoModels.Actions.Wizards.VolumeDefinition;
 
 
 import com.Sts.Framework.Actions.Wizards.*;
 import com.Sts.Framework.Actions.Wizards.WizardHeaders.StsHeaderPanel;
-import com.Sts.PlugIns.GeoModels.Actions.Wizards.StsVolumeDefinitionPanel;
 import com.Sts.PlugIns.GeoModels.DBTypes.StsGeoModelVolume;
 
 /**

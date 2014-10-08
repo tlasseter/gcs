@@ -20,9 +20,10 @@ import java.util.*;
 public class StsLineVectorSet extends StsCoorTimeVectorSet
 {
 	static public int M = 4;
+
 	public StsLineVectorSet() { }
 
-	public StsLineVectorSet(boolean persistent) { super(persistent); }
+    public StsLineVectorSet(boolean persistent) { super(persistent); }
 
 	public StsLineVectorSet(StsVectorSetLoader vectorSetLoader)
 	{
@@ -33,6 +34,16 @@ public class StsLineVectorSet extends StsCoorTimeVectorSet
 	{
 		super(dataSource, sourceCreateTime, group, name);
 	}
+
+    public StsLineVectorSet(String group, String name)
+    {
+        super(group, name);
+    }
+
+    static public StsLineVectorSet constructor()
+    {
+        return new StsLineVectorSet();
+    }
 
 	static public StsLineVectorSet constructor(StsTimeVectorSetLoader timeVectorSetLoader)
 	{
@@ -45,6 +56,13 @@ public class StsLineVectorSet extends StsCoorTimeVectorSet
     {
         StsLineVectorSet lineVectorSet = new StsLineVectorSet();
         lineVectorSet.initializeCoorDbVectors(StsLoader.xyztmVectorNames, capacity);
+        return lineVectorSet;
+    }
+
+    static public StsLineVectorSet constructor(String group, String name)
+    {
+        StsLineVectorSet lineVectorSet = new StsLineVectorSet(group, name);
+        lineVectorSet.initializeCoorDataVectors(StsLoader.xyztmVectorNames, capacity);
         return lineVectorSet;
     }
 

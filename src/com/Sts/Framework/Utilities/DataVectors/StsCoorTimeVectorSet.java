@@ -56,6 +56,11 @@ public class StsCoorTimeVectorSet extends StsTimeVectorSet
 		super(dataSource, sourceCreateTime, group, name);
 	}
 
+    public StsCoorTimeVectorSet(String group, String name)
+    {
+        super(group, name);
+    }
+
 	public StsCoorTimeVectorSet(StsVectorSetLoader vectorSetLoader)
 	{
 		super(vectorSetLoader);
@@ -1012,6 +1017,13 @@ public class StsCoorTimeVectorSet extends StsTimeVectorSet
 		for(int n = 0; n < nCoorVectors; n++)
 			coorVectors[n] = new StsFloatDbVector(names[n], capacity);
 	}
+
+    public void initializeCoorDataVectors(String[] names, int capacity)
+    {
+        coorVectors = new StsFloatDataVector[nCoorVectors];
+        for(int n = 0; n < nCoorVectors; n++)
+            coorVectors[n] = new StsFloatDataVector(names[n], capacity);
+    }
 
 	public int addXyztPoint(StsPoint point)
     {

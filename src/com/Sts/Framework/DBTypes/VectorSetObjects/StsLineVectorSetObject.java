@@ -260,4 +260,9 @@ public class StsLineVectorSetObject extends StsCoorTimeVectorSetObject
 	{
 		return getLineVectorSet().getCoordinatesAtMDepth(m, extrapolate);
 	}
+
+    public boolean checkWriteBinaryFiles()
+    {
+        return vectorSet.checkWriteBinaryFiles();
+    }
 }

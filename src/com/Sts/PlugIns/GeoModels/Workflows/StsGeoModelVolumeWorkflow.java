@@ -15,10 +15,15 @@ public class StsGeoModelVolumeWorkflow extends StsWorkflow
 {
     protected StsWorkflowTreeNode buildModelNode = new StsWorkflowTreeNode("Build Model");
 
-	protected StsWorkflowTreeNode geoModel = new StsWorkflowTreeNode("com.Sts.PlugIns.GeoModels.Actions.Wizards.StsVolumeDefinitionWizard", "Build volume for geoModell",
+	protected StsWorkflowTreeNode geoModel = new StsWorkflowTreeNode("com.Sts.PlugIns.GeoModels.Actions.Wizards.VolumeDefinition.StsVolumeDefinitionWizard", "Build volume for geoModel",
 		"Construct volume for geological model.",
 		"Must have new project as a minimum.",
 		"horizonPicker20x20.gif");
+
+    protected StsWorkflowTreeNode channels = new StsWorkflowTreeNode("com.Sts.PlugIns.GeoModels.Actions.Wizards.Channels.StsCreateChannelsWizard", "Build channels in model",
+            "Construct volume for geological model.",
+            "Must have new project as a minimum.",
+            "horizonPicker20x20.gif");
 
     public StsGeoModelVolumeWorkflow()
     {
@@ -33,6 +38,7 @@ public class StsGeoModelVolumeWorkflow extends StsWorkflow
 
 		workflowRoot.addChild(buildModelNode);
 			addGroupNode(buildModelNode, geoModel);
+            addGroupNode(buildModelNode, channels);
 
     }
 }

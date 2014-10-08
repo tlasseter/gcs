@@ -109,6 +109,14 @@ public class StsVectorSet extends StsMainObject implements Cloneable, Serializab
 		constructDataVectors(vectorSetLoader);
 	}
 
+    public StsVectorSet(String group, String name)
+    {
+        super(false);
+        this.group = group;
+        this.name = name;
+        setVersion();
+    }
+
 	public boolean initialize(StsModel model)
 	{
 		if(!initialize()) return false;
@@ -752,7 +760,7 @@ public class StsVectorSet extends StsMainObject implements Cloneable, Serializab
 
 	public ArrayList<StsDataVectorFace> getDataVectorArrayList()
 	{
-		ArrayList<StsDataVectorFace> dataVectors = new ArrayList<StsDataVectorFace>();
+		ArrayList<StsDataVectorFace> dataVectors = new ArrayList<>();
 		for(StsAbstractFloatVector vector : valueVectors)
 			if(vector != null && vector instanceof StsFloatDataVector)
 				dataVectors.add((StsDataVectorFace)vector);

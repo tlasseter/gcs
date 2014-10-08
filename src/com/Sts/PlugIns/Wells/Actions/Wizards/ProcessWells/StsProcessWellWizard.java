@@ -152,10 +152,20 @@ public class StsProcessWellWizard extends StsLoadWizard
 	}
 
     public boolean initialize()
+        {
+        if(steps == null || steps.size() == 0)
+        {
+            StsException.systemError("StsWizard.initialize() failed. No wizard steps.");
+            return false;
+        }
+        return gotoFirstStep();
+    }
+/*
+    public boolean initialize()
     {
         return true;
     }
-
+*/
 	public void next()
 	{
 		if(currentStep == sourceSelectStep)

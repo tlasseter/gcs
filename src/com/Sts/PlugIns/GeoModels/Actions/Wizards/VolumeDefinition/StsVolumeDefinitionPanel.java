@@ -1,4 +1,4 @@
-package com.Sts.PlugIns.GeoModels.Actions.Wizards;
+package com.Sts.PlugIns.GeoModels.Actions.Wizards.VolumeDefinition;
 
 import com.Sts.Framework.Actions.Wizards.StsWizard;
 import com.Sts.Framework.UI.Beans.*;

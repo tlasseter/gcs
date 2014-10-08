@@ -40,6 +40,11 @@ public class StsTimeVectorSet extends StsVectorSet implements Cloneable, Seriali
 		super(dataSource, sourceCreateTime, group, name);
 	}
 
+    public StsTimeVectorSet(String group, String name)
+    {
+        super(group, name);
+    }
+
 	public StsTimeVectorSet(StsVectorSetLoader vectorSetLoader)
 	{
 		super(vectorSetLoader);

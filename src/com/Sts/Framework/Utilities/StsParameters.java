@@ -592,14 +592,16 @@ public class StsParameters
 
     static public byte getDistanceUnitsFromString(String dUnitString)
     {
-        for (int n = 0; n < DIST_STRINGS.length; n++)
-        {
-            if (dUnitString.equals(DIST_STRINGS[n]))
-            {
-                return (byte) n;
-            }
-        }
-        return DIST_NONE;
+        byte index = getByteIndexFromString(dUnitString, DIST_STRINGS);
+        if(index == -1) return DIST_NONE;
+        else return index;
+    }
+
+    static public byte getByteIndexFromString(String string, String[] strings)
+    {
+        for (int n = 0; n < strings.length; n++)
+            if (string.equals(strings[n])) return (byte) n;
+        return -1;
     }
     static public String getDistanceUnitString(byte type)
     {

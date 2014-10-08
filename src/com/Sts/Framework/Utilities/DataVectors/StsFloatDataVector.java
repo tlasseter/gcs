@@ -63,6 +63,12 @@ public class StsFloatDataVector extends StsFloatTransientValuesVector implements
 		checkSetValues(values);
 	}
 
+    public StsFloatDataVector(String name, int capacity)
+    {
+        this.name = name;
+        this.capacity = capacity;
+    }
+
 	public StsFloatDataVector(String name, float[] values)
 	{
 		this.name = name;

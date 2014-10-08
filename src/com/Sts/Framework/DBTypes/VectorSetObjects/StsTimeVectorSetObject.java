@@ -18,12 +18,6 @@ abstract public class StsTimeVectorSetObject extends StsVectorSetObject implemen
 	/** The maximum time duration (seconds) of real-time time series plots of this sensor */
 	protected int timeSeriesDuration = 18000;  // default is 30 minutes
 
-	static public final byte LINEAR = 0;
-	static public final byte LOG10 = 1;
-	static public final byte LOGE = 2;
-	static public final String[] AXIS_STRINGS = new String[] { "Linear", "Log10", "LogE"};
-	static public final byte[] AXIS_TYPES = new byte[] {LINEAR, LOG10, LOGE};
-
 	StsTimeVectorSetObject()
 	{
 	}
