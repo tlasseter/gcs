@@ -169,7 +169,8 @@ public class StsObjectTreePanel extends JPanel implements ChangeListener // , Ac
 				if(!(stsClass instanceof StsObjectPanelClass)) continue;
 				StsObjectPanelClass stsPanelClass = (StsObjectPanelClass) stsClass;
 				StsTreeNode classTreeNode = stsPanelClass.addDynamicNode(this);
-				classTreeNode.checkAddChildren(stsPanelClass);
+                if(classTreeNode != null)
+				    classTreeNode.checkAddChildren(stsPanelClass);
 
 			}
 			treeModel = new DefaultTreeModel(rootNode);

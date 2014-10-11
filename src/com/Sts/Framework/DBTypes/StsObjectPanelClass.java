@@ -1,4 +1,3 @@
-
 //Title:        S2S: Seismic-to-simulation
 //Version:
 //Copyright:    Copyright (c) 2001
@@ -159,7 +158,6 @@ public class StsObjectPanelClass extends StsClass implements StsTreeObjectI, Sts
 		//	currentModel.setCurrentObjectInPanels(object);
         return true;
     }
-
 	/*
 	 public void add(StsObject obj) throws StsException
 	 {
@@ -364,6 +362,7 @@ public class StsObjectPanelClass extends StsClass implements StsTreeObjectI, Sts
             ActionListener listener = (ActionListener)actionListeners.get(n);
             listener.actionPerformed(new ActionEvent(object, 0, "selected"));
         }
+        setCurrentObject(object);
     }
 
     public StsInstanceDeleteCmd constructInstanceDeleteCmd(StsObject obj)
@@ -801,7 +800,9 @@ public class StsObjectPanelClass extends StsClass implements StsTreeObjectI, Sts
 
 	public StsTreeNode addDynamicNode(StsObjectTreePanel objectTreePanel)
 	{
-		objectPanelNode = getParentNode(objectTreePanel).addDynamicNode(this, getObjectPanelLabel());
+        StsTreeNode parentNode = getParentNode(objectTreePanel);
+        if(parentNode == null) return null;
+		objectPanelNode = parentNode.addDynamicNode(this, getObjectPanelLabel());
 		return objectPanelNode;
     }
 

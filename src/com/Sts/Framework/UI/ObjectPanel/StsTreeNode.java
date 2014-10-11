@@ -67,6 +67,17 @@ public class StsTreeNode extends DefaultMutableTreeNode
 		return new StsTreeNode(object, object.getName(), false);
 	}
 
+    /*
+    static public StsTreeNode constructDynamicNode(StsTreeNode treeNode)
+	{
+        return constructDynamicNode(treeNode.getTreeNodeObject());
+	}
+
+    static public StsTreeNode constructDynamicNode(StsTreeObjectI object)
+    {
+        return new StsTreeNode(object, object.getName(), false);
+    }
+     */
 	static public StsTreeNode constructDynamicNode(StsObjectPanelClass stsPanelClass)
 	{
 		StsTreeNode treeNode = new StsTreeNode(stsPanelClass, stsPanelClass.getObjectPanelLabel(), false);
@@ -131,27 +142,42 @@ public class StsTreeNode extends DefaultMutableTreeNode
 
 	boolean checkAddChildren(StsTreeObjectI treeObject)
 	{
-		if(treeObject == null) return false;
-		if(staticChildren) return false;
-		Object[] children = treeObject.getChildren();
-		int nObjectChildren;
-		if(children == null)
-			nObjectChildren = 0;
-		else
-			nObjectChildren = children.length;
+        int nObjectChildren;
 
-		int nCurrentChildren = getChildCount();
-		if(nObjectChildren == nCurrentChildren) return false;
+        if(treeObject == null) return false;
+		if(staticChildren) return false;
+		Object[] childObjects = treeObject.getChildren();
+        Enumeration<TreeNode> childNodes = children();
+
+        if(childObjects == null)
+            nObjectChildren = 0;
+        else
+            nObjectChildren = childObjects.length;
+
+        if(childrenOK(childNodes, nObjectChildren)) return false;
 
 		removeAllChildren();
 
 		for(int n = 0; n < nObjectChildren; n++)
 		{
-			StsTreeObjectI child = (StsTreeObjectI) children[n];
+			StsTreeObjectI child = (StsTreeObjectI) childObjects[n];
 			add(StsTreeNode.constructDynamicNode(child));
 		}
 		return true;
+
 	}
+
+    private boolean childrenOK(Enumeration<TreeNode> childNodes, int nObjectChildren)
+    {
+        int nCurrentChildren = getChildCount();
+        if(nObjectChildren != nCurrentChildren) return false;
+        while(childNodes.hasMoreElements())
+        {
+            StsTreeNode childNode = (StsTreeNode)childNodes.nextElement();
+            if (!childNode.isExplored()) return false;
+        }
+        return true;
+    }
 
 	/* two methods below used for debugging treeNode child add/remove
 	  public void add(MutableTreeNode newChild)

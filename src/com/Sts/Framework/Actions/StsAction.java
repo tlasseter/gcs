@@ -1,4 +1,3 @@
-
 //Title:        S2S: Seismic-to-simulation
 //Version:
 //Copyright:    Copyright (c) 2001
@@ -8,6 +7,7 @@
 
 package com.Sts.Framework.Actions;
 
+import com.Sts.Framework.DBTypes.StsProject;
 import com.Sts.Framework.MVC.*;
 import com.Sts.Framework.MVC.Views.*;
 import com.Sts.Framework.Types.*;
@@ -106,6 +106,7 @@ abstract public class StsAction
     }
     
     public StsModel getModel() { return model; }
+    public StsProject getProject() { return model.getProject(); }
     public StsActionManager getActionManager() { return actionManager; }
 
     public boolean checkPrerequisites() { return true; }

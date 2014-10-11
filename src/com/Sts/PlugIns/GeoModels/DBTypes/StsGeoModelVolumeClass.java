@@ -1,13 +1,14 @@
 package com.Sts.PlugIns.GeoModels.DBTypes;
 
 import com.Sts.Framework.DB.StsSerializable;
+import com.Sts.Framework.DBTypes.StsModelObjectPanelClass;
 import com.Sts.Framework.DBTypes.StsObjectPanelClass;
 import com.Sts.Framework.DBTypes.StsSpectrumClass;
 import com.Sts.Framework.Interfaces.MVC.*;
 import com.Sts.Framework.Interfaces.StsTreeObjectI;
 import com.Sts.PlugIns.Seismic.DBTypes.StsSeismicVolume;
 
-public class StsGeoModelVolumeClass extends StsObjectPanelClass implements StsSerializable, StsTreeObjectI, StsRotatedClass,
+public class StsGeoModelVolumeClass extends StsModelObjectPanelClass implements StsSerializable, StsTreeObjectI, StsRotatedClass,
         StsClassDisplayable, StsClassObjectSelectable
 {
     private boolean fillPlaneNulls = false;

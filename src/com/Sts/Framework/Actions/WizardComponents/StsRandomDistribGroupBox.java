@@ -58,7 +58,10 @@ public class StsRandomDistribGroupBox extends StsGroupBox implements StsRandomDi
         if(type == StsRandomDistribFace.TYPE_GAUSS)
             return avg + dev*random.nextGaussian();
         else
-            return avg + dev*random.nextDouble();
+        {
+            double value = random.nextDouble();
+            return avg + dev * (value - 0.5);
+        }
     }
 
     @Override

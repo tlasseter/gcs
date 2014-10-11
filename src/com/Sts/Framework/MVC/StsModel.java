@@ -1156,7 +1156,7 @@ public class StsModel extends StsSerialize
 	public StsTransaction getCreateCurrentTransaction(String name)
 	{
 		if(currentTransaction == null)
-			currentTransaction = new StsTransaction(name + nTransaction++);
+			currentTransaction = new StsTransaction(name + " trans " + nTransaction++);
 		return currentTransaction;
 	}
 
@@ -2708,8 +2708,10 @@ public class StsModel extends StsSerialize
 			addToInterfaceLists(stsClass);
 			stsClass.initializeFields();
 			initializeClassPreferences(stsClass);
-			if(!(stsClass instanceof StsObjectPanelClass)) return;
-			if(objectTreePanel != null)
+
+            if(objectTreePanel == null) return;
+
+            if(stsClass instanceof StsObjectPanelClass)
 			{
 				StsObjectPanelClass stsPanelClass = (StsObjectPanelClass)stsClass;
 				StsTreeNode parentNode = stsPanelClass.getParentNode(objectTreePanel);

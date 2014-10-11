@@ -35,40 +35,6 @@ public class StsFieldBeanPanel extends StsJPanel
 
  	public static StsFieldBeanPanel addInsets() {return new StsFieldBeanPanel(true); }
 
-    /** default layout required for UI designers like JBuilder */
-    private void setLayout()
-    {
-//        setLayout(xYLayout1);
-        setSize(400, 300);
-    }
-/*
-	public void initializeLayout()
-	{
-        try
-        {
-            setLayout(gb);
-            gbc.insets = new Insets(2, 2, 2, 2);
-            gbc.anchor = GridBagConstraints.WEST;
-            gbc.gridwidth = 1;
-            gbc.gridx = 0;
-            gbc.gridy = 0;
-            gbc.fill = GridBagConstraints.HORIZONTAL;
-        }
-        catch(Exception e)
-        {
-            StsException.systemError("StsFieldBeanPanel.initializeLayout() failed.");
-        }
-    }
-*/
-
-    /** when beans are added to panel, they are first given this beanPanel */
-/*
-    public void add(StsFieldBean fieldBean)
-    {
-        fieldBean.setBeanPanel(this);
-        addField(fieldBean);
-    }
-*/
     public Component add(Component component)
     {
 		checkAddFieldBeans(component);
@@ -264,74 +230,6 @@ public class StsFieldBeanPanel extends StsJPanel
 		initializeBeans();
 	}
 
-/*
-    public void add(StsFieldBean field, GridBagConstraints gbc)
-    {
-        if(field == null) return;
-
-        Component[] components = field.getNonNullComponents();
-//        components = removeNullComponents(components);
-
-        int nComponents = components.length;
-        if(nComponents > 0)
-        {
-            super.add(components[0], gbc);
-            gbc.gridy += 1;
-        }
-        if(nComponents > 1)
-        {
-            gbc.gridwidth = GridBagConstraints.REMAINDER;
-            gbc.gridx += 1;
-            gbc.anchor = GridBagConstraints.EAST;
-            super.add(components[1], gbc);
-            gbc.anchor = GridBagConstraints.WEST;
-            gbc.gridx -= 1;
-            gbc.gridwidth = 1;
-       }
-       gbc.gridy += 1;
-	   super.add(vertStrut5, gbc);
-	   gbc.gridy += 1;
-	   fieldBeans = (StsFieldBean[])StsMath.arrayAddElement(fieldBeans, field, StsFieldBean.class);
-    }
-
-    public void remove(StsFieldBean field)
-    {
-        if(fieldBeans == null || fieldBeans.length == 0) return;
-        fieldBeans = (StsFieldBean[])StsMath.arrayDeleteElement(fieldBeans, field);
-        Component[] components = field.getBeanComponents();
-        if(components == null) return;
-        for(int n = 0; n < components.length; n++)
-            if(components[n] != null) super.remove(components[n]);
-    }
-
-    private void addField(StsFieldBean field)
-    {
-        if(field == null) return;
-
-        Component[] components = field.getNonNullComponents();
-//        components = removeNullComponents(components);
-
-        int nComponents = components.length;
-        if(nComponents > 0)
-        {
-            gbc.gridwidth = 1;
-            gbc.gridx = 0;
-            super.add(components[0], gbc);
-        }
-        if(nComponents > 1)
-        {
-            gbc.gridwidth = GridBagConstraints.REMAINDER;
-            gbc.gridx = 1;
-            super.add(components[1], gbc);
-            gbc.gridwidth = 1;
-        }
-        gbc.gridy += 1;
-        super.add(vertStrut5, gbc);
-          gbc.gridy += 1;
-
-        fieldBeans = (StsFieldBean[])StsMath.arrayAddElement(fieldBeans, field, StsFieldBean.class);
-    }
-*/
     public StsFieldBean getBeanNamed(String name)
     {
         if(fieldBeans == null) return null;
