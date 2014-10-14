@@ -21,10 +21,15 @@ import java.util.Random;
  */
 public class StsRandomDistribGroupBox extends StsGroupBox implements StsRandomDistribFace
 {
-    private double avg;
-    private double dev;
-    private int count;
-    private byte type;
+    protected double avg;
+    protected double dev;
+    protected int count;
+    protected byte type;
+
+    private StsComboBoxFieldBean typeBean;
+    private StsIntFieldBean countBean = null;
+    private StsDoubleFieldBean avgBean, devBean;
+
     private Random random = new Random();
     static private String[] typeStrings = StsRandomDistribFace.typeStrings;
 
@@ -38,17 +43,32 @@ public class StsRandomDistribGroupBox extends StsGroupBox implements StsRandomDi
         buildPanel();
     }
 
+    public StsRandomDistribGroupBox(double avg, double dev, byte type, String valueName)
+    {
+        super(valueName + " Distribution");
+        this.avg = avg;
+        this.dev = dev;
+        this.count = -1;
+        this.type = type;
+        constructBeans();
+        buildPanel();
+    }
+
+    private void constructBeans()
+    {
+        typeBean = new StsComboBoxFieldBean(this, "type", "Type: ", StsRandomDistribFace.typeStrings);
+        if(count != -1)
+            countBean = new StsIntFieldBean(this, "count", 0, 1000000, "Num Samples:", true);
+        avgBean = new StsDoubleFieldBean(this, "avg", true, "Average:", true);
+        devBean = new StsDoubleFieldBean(this, "dev", 0, Double.MAX_VALUE, "Std Dev:", true);
+    }
     private void buildPanel()
     {
-        StsComboBoxFieldBean typeListBean = new StsComboBoxFieldBean(this, "type", "Type: ", StsRandomDistribFace.typeStrings);
-        typeListBean.setSelectedIndex(type);
-        StsDoubleFieldBean avgBean = new StsDoubleFieldBean(this, "avg", true, "Average:", true);
-        StsDoubleFieldBean devBean = new StsDoubleFieldBean(this, "dev", 0, Double.MAX_VALUE, "Std Dev:", true);
-        StsIntFieldBean countBean = new StsIntFieldBean(this, "count", 0, 1000000, "Num Samples:", true) ;
         gbc.fill = HORIZONTAL;
 
-        addBeanToRow(typeListBean);
-        addBeanEndRow(countBean);
+        addBeanToRow(typeBean);
+        if(countBean != null)
+            addBeanEndRow(countBean);
         addBeanToRow(avgBean);
         addBeanEndRow(devBean);
     }

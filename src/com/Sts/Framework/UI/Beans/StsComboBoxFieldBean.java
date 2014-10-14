@@ -77,8 +77,8 @@ public class StsComboBoxFieldBean extends StsFieldBean implements PopupMenuListe
 
     public void classInitialize(Class c, String fieldName, String fieldLabel, Object[] items)
     {
-        super.classInitialize(c, fieldName, true, fieldLabel);
         setListItems(items);
+        super.classInitialize(c, fieldName, true, fieldLabel);
 //		comboBox.setEnabled(editable);
         comboBox.setEditable(false);
 		layoutBean();
@@ -98,8 +98,8 @@ public class StsComboBoxFieldBean extends StsFieldBean implements PopupMenuListe
 
     public void initialize(Object instance, String fieldName, String fieldLabel, Object[] items)
     {
+        setListItems(items);
         super.initialize(instance, fieldName, true, fieldLabel);
-		setListItems(items);
         comboBox.setEditable(editable);
         layoutBean();
         addActionListener();
@@ -108,8 +108,8 @@ public class StsComboBoxFieldBean extends StsFieldBean implements PopupMenuListe
 
 	public void initialize(Object instance, String fieldName, String fieldLabel, ArrayList itemList)
 	{
+        setListItems(itemList.toArray());
 		super.initialize(instance, fieldName, true, fieldLabel);
-		setListItems(itemList.toArray());
 		comboBox.setEditable(editable);
 		layoutBean();
 		addActionListener();

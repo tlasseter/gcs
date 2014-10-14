@@ -1350,6 +1350,36 @@ public class StsGLDraw
         }
     }
 
+    static public void drawXYArc(GL gl, StsColor color, boolean highlighted, float x0, float y0, float z, float r, float dir, float arc, float dArc)
+    {
+        int nSegments = Math.min(5, StsMath.ceiling(arc/dArc));
+        dArc = arc/nSegments;
+
+        StsPoint[] points = new StsPoint[nSegments+1];
+        points[0] = new StsPoint(x0, y0, z);
+
+        float xc = (float)(x0 + r*StsMath.cosd(dir));
+        float yc = (float)(y0 + r*StsMath.sind(dir));
+
+        float a;
+        if(arc > 0)
+            a =  dir - 90 + dArc;
+        else
+            a =  dir - 90 + dArc;
+
+        for(int n = 1; n < nSegments; n++, a += dArc)
+        {
+            float x = xc + (float) StsMath.cosd(a);
+            float y = yc + (float) StsMath.sind(a);
+            points[n] = new StsPoint(x, y, z);
+        }
+        if (highlighted)
+            gl.glLineWidth(StsGraphicParameters.well3dLineWidthHighlighted);
+        else
+            gl.glLineWidth(StsGraphicParameters.well3dLineWidth);
+        drawLineStrip(gl, color, points);
+    }
+
     /**
      * Draw a square point "width" pixels wide and "height" pixels high centered
      * at point on the screen, shifted "shift" screen units away from the viewer.

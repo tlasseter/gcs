@@ -744,6 +744,14 @@ public class StsPoint extends StsSerialize implements Cloneable, StsSerializable
 			v[i] += v0[i] * f;
 	}
 
+    public StsPoint addXYVector(float angle, float length)
+    {
+        StsPoint point = this.copy();
+        point.v[0] += length*(float)StsMath.cosd(angle);
+        point.v[1] += length*(float)StsMath.sind(angle);
+        return point;
+    }
+
 	public void multiply(float f)
 	{
 		for(int i = 0; i < v.length; i++)
@@ -1221,6 +1229,12 @@ public class StsPoint extends StsSerialize implements Cloneable, StsSerializable
 		for(int i = 0; i < getLength(); i++) v[i] -= otherPoint.v[i];
 		return true;
 	}
+
+    static public StsPoint getLastPoint(StsPoint[] points)
+    {
+        if(points == null) return null;
+        return points[points.length-1];
+    }
 
 	public StsPoint getNearestPointOnSegmentedLine(int distanceType, StsPoint[] linePoints, float indexF)
 	{
