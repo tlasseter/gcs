@@ -2,19 +2,20 @@ package com.Sts.PlugIns.GeoModels.DBTypes;
 
 import com.Sts.Framework.Interfaces.StsTreeObjectI;
 import com.Sts.Framework.Interfaces.StsXYGridable;
-import com.Sts.Framework.MVC.Views.StsGLPanel;
 import com.Sts.Framework.MVC.Views.StsGLPanel3d;
 import com.Sts.Framework.MVC.Views.StsView3d;
+import com.Sts.Framework.Types.StsColor;
 import com.Sts.Framework.Types.StsPoint;
 import com.Sts.Framework.Types.StsRotatedGridBoundingBox;
 import com.Sts.Framework.UI.Beans.*;
 import com.Sts.Framework.UI.ObjectPanel.StsObjectPanel;
-import com.Sts.Framework.UI.StsMessage;
 import com.Sts.Framework.Utilities.StsException;
+import com.Sts.Framework.Utilities.StsGLDraw;
 import com.Sts.Framework.Utilities.StsMath;
-import com.Sts.Framework.Utilities.StsParameters;
-import com.Sts.PlugIns.GeoModels.StsChannelLineSegment;
+import com.Sts.PlugIns.GeoModels.Types.StsChannelLineSegment;
+import com.Sts.PlugIns.GeoModels.Types.StsChannelSegment;
 
+import javax.media.opengl.GL;
 import java.io.Serializable;
 
 /**
@@ -24,8 +25,14 @@ import java.io.Serializable;
  */
 public class StsChannel extends StsRotatedGridBoundingBox implements StsTreeObjectI, StsXYGridable, Serializable, Cloneable
 {
+    private float channelWidth;
+    private float channelThickness;
+    private StsPoint startPoint;
+    private StsPoint endPoint;
+    private float direction;
+    private StsChannelSegment[] channelSegments;
+
     private boolean readoutEnabled = false;
-    private StsChannelLineSegment[] channelSegments = new StsChannelLineSegment[0];
     static protected StsObjectPanel objectPanel = null;
 
     static public final StsFieldBean[] displayFields =
@@ -49,36 +56,28 @@ public class StsChannel extends StsRotatedGridBoundingBox implements StsTreeObje
 
     public StsChannel() { }
 
-    public StsChannel(boolean persistent)
+    public StsChannel(float channelWidth, float channelThickness, StsPoint firstPoint, StsPoint lastPoint, float direction)
     {
-        super(persistent);
+        this.channelWidth = channelWidth;
+        this.channelThickness = channelThickness;
+        this.startPoint = firstPoint;
+        this.endPoint = lastPoint;
+        this.direction = direction;
     }
 
-    static public StsChannel buildStraightLine(StsPoint firstPoint, StsPoint lastPoint)
-    {
-        StsChannel channel = new StsChannel(false);
-        if(!channel.constructStraightLine(firstPoint, lastPoint)) return null;
-        return channel;
-    }
-    private boolean constructStraightLine(StsPoint firstPoint, StsPoint lastPoint)
-    {
-        try
-        {
-            StsChannelLineSegment lineSegment = new StsChannelLineSegment(firstPoint, lastPoint);
-            channelSegments = (StsChannelLineSegment[])StsMath.arrayAddElement(channelSegments, lineSegment);
-
-            return true;
-        }
-        catch (Exception e)
-        {
-            StsException.outputWarningException(this, "constructStraightLine", e);
-            return false;
-        }
-    }
     public void display(StsGLPanel3d glPanel3d)
     {
-        for(StsChannelLineSegment channelSegment : channelSegments)
-            channelSegment.display(glPanel3d);
+        if(channelSegments == null || channelSegments.length == 0)
+        {
+            GL gl = glPanel3d.getGL();
+            if (gl == null) return;
+            StsGLDraw.drawLine(gl, StsColor.RED, true, new StsPoint[] { startPoint, endPoint});
+        }
+        else
+        {
+            for (StsChannelSegment channelSegment : channelSegments)
+                channelSegment.display(glPanel3d);
+        }
     }
 
     public StsFieldBean[] getDisplayFields() { return displayFields; }
@@ -120,5 +119,30 @@ public class StsChannel extends StsRotatedGridBoundingBox implements StsTreeObje
     public void setReadoutEnabled(boolean readoutEnabled)
     {
         this.readoutEnabled = readoutEnabled;
+    }
+
+    public float getChannelWidth()
+    {
+        return channelWidth;
+    }
+
+    public float getChannelThickness()
+    {
+        return channelThickness;
+    }
+
+    public StsPoint getStartPoint()
+    {
+        return startPoint;
+    }
+
+    public StsPoint getEndPoint()
+    {
+        return endPoint;
+    }
+
+    public float getDirection()
+    {
+        return direction;
     }
 }

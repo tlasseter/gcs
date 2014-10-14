@@ -35,7 +35,7 @@ public class StsVolumeDefinitionStep extends StsWizardStep
     public boolean start()
     {
         wizard.dialog.setTitle("Define Volume Bounds");
-        initialize(wizard, panel, null, header);
+//        initialize(wizard, panel, null, header);
         panel.initialize();
         return true;
     }

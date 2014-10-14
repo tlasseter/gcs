@@ -1,4 +1,4 @@
-package com.Sts.PlugIns.GeoModels;
+package com.Sts.PlugIns.GeoModels.Types;
 
 import com.Sts.Framework.DB.StsSerializable;
 import com.Sts.Framework.DBTypes.StsSerialize;
@@ -16,16 +16,19 @@ import java.io.Serializable;
  * All Rights Reserved
  * No part of this website or any of its contents may be reproduced, copied, modified or adapted, without the prior written consent of the author, unless otherwise indicated for stand-alone materials.
  */
-public class StsChannelLineSegment extends StsSerialize implements Cloneable, StsSerializable, Serializable
+public class StsChannelLineSegment extends StsChannelSegment implements Cloneable, StsSerializable, Serializable
 {
-    StsPoint[] points = new StsPoint[2];
-
     public StsChannelLineSegment() { }
 
     public StsChannelLineSegment(StsPoint firstPoint, StsPoint lastPoint)
     {
-        points[0] = firstPoint;
-        points[1] = lastPoint;
+        points = new StsPoint[] { firstPoint, lastPoint};
+    }
+
+    public StsChannelLineSegment(StsPoint firstPoint, float direction, float length)
+    {
+        StsPoint lastPoint = firstPoint.addXYVector(direction + 90, length);
+        points = new StsPoint[] { firstPoint, lastPoint};
     }
 
     public void display(StsGLPanel3d glPanel3d)

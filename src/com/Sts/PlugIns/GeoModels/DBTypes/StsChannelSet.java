@@ -19,7 +19,7 @@ import java.util.ArrayList;
  */
 public class StsChannelSet extends StsRotatedGridBoundingBox implements StsTreeObjectI, Serializable, Cloneable
 {
-    protected StsObjectRefList channels = null;
+    private StsObjectRefList channels = null;
 
     static public final StsFieldBean[] displayFields =
     {
@@ -35,12 +35,14 @@ public class StsChannelSet extends StsRotatedGridBoundingBox implements StsTreeO
 
     public StsChannelSet() { }
 
-    public StsChannelSet(boolean persistent) { super(persistent); }
+    public StsChannelSet(boolean persistent)
+    {
+        super(persistent);
+    }
 
     public void addChannel(StsChannel channel)
     {
-        channel.addToModel();
-        if(channels == null) channels = StsObjectRefList.constructor(100, 100, "channels", this, false);
+        if(channels == null) channels = StsObjectRefList.constructor(100, 100, "channels", this);
         channels.add(channel);
     }
 
@@ -73,5 +75,10 @@ public class StsChannelSet extends StsRotatedGridBoundingBox implements StsTreeO
         currentModel.setCurrentObject(this);
         currentModel.getGlPanel3d().checkAddView(StsView3d.class);
         currentModel.win3dDisplayAll();
+    }
+
+    public StsObjectRefList getChannels()
+    {
+        return channels;
     }
 }

@@ -7,6 +7,7 @@ import com.Sts.Framework.MVC.StsActionManager;
 import com.Sts.Framework.UI.Progress.StsProgressPanel;
 import com.Sts.Framework.UI.StsMessage;
 import com.Sts.Framework.Utilities.StsParameters;
+import com.Sts.PlugIns.GeoModels.DBTypes.StsChannelSet;
 import com.Sts.PlugIns.GeoModels.DBTypes.StsGeoModelVolume;
 
 /**
@@ -17,7 +18,8 @@ public class StsCreateChannelsWizard extends StsWizard
 {
     String volName = "geoVolumeName";
     private StsGeoModelVolume geoModelVolume = new StsGeoModelVolume(false);
-    public StsChannelsDefinitionStep defineChannels = new StsChannelsDefinitionStep(this);
+    public StsChannelsAxesStep channelAxes = new StsChannelsAxesStep(this);
+    public StsChannelGeometryStep channelGeometry = new StsChannelGeometryStep(this);
 
     public StsCreateChannelsWizard(StsActionManager actionManager)
     {
@@ -28,7 +30,7 @@ public class StsCreateChannelsWizard extends StsWizard
 
     public void addSteps()
     {
-        addSteps(new StsWizardStep[]{defineChannels});
+        addSteps(new StsWizardStep[]{channelAxes, channelGeometry});
     }
 
     public StsCreateChannelsWizard(StsActionManager actionManager, int width, int height)
@@ -54,7 +56,7 @@ public class StsCreateChannelsWizard extends StsWizard
 
     public void next()
     {
-        if (currentStep == defineChannels) end();
+        gotoNextStep();
     }
 
     public void previous() {
@@ -69,7 +71,7 @@ public class StsCreateChannelsWizard extends StsWizard
     public boolean buildVolume(StsProgressPanel ppanel) {
         return true;
     }
-    // public StsGeoModelVolume getGeoModelVolume() { return defineChannels.panel.getGeoModelVolume(); }
+    // public StsGeoModelVolume getGeoModelVolume() { return channelAxes.panel.getGeoModelVolume(); }
 
     public boolean addToProjectAndModel(StsGeoModelVolume geoModelVolume)
     {
@@ -82,5 +84,10 @@ public class StsCreateChannelsWizard extends StsWizard
         project.initializeViews();
         geoModelVolume.addToModel();
         return true;
+    }
+
+    public StsChannelSet getChannelSet()
+    {
+        return channelAxes.getChannelSet();
     }
 }

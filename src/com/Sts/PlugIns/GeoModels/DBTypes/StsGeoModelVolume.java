@@ -70,11 +70,11 @@ public class StsGeoModelVolume extends StsRotatedGridBoundingBox implements StsT
 
         xInc = 10;
         yInc = 10;
-        zInc = 10;
+        zInc = 0.2f;
 
-        nRows = 100;
-        nCols = 100;
-        nSlices = 10;
+        nRows = 1001;
+        nCols = 1001;
+        nSlices = 501;
 
         angle = 0;
 
