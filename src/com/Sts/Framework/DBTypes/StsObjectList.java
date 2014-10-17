@@ -275,6 +275,11 @@ public class StsObjectList extends StsList implements StsSerializable
         return new ObjectIterator(true, type);
     }
 
+    public ObjectIterator getObjectSubsetIterator(int firstIndex, int number)
+    {
+        return new ObjectIterator(firstIndex, number);
+    }
+
     public StsObject[] getObjectList()
     {
         return getElements();
@@ -393,6 +398,7 @@ public class StsObjectList extends StsList implements StsSerializable
     public class ObjectIterator implements Iterator
     {
         int nObjects = 0;
+        int sizeLimit = 0;
         int n = 0;
         StsMainObject next = null;
         boolean visibleOnly = false;
@@ -400,6 +406,7 @@ public class StsObjectList extends StsList implements StsSerializable
 
         ObjectIterator()
         {
+            sizeLimit = size;
             nObjects = size;
             if(nObjects > 0) setNext();
         }
@@ -407,6 +414,7 @@ public class StsObjectList extends StsList implements StsSerializable
         ObjectIterator(boolean visibleOnly)
         {
 
+            sizeLimit = size;
             nObjects = size;
             this.visibleOnly = visibleOnly;
             if(nObjects > 0) setNext();
@@ -414,6 +422,7 @@ public class StsObjectList extends StsList implements StsSerializable
 
         ObjectIterator(boolean visibleOnly, byte type)
         {
+            sizeLimit = size;
             nObjects = size;
             this.visibleOnly = visibleOnly;
             if(type < 0 || type == -128)
@@ -423,13 +432,21 @@ public class StsObjectList extends StsList implements StsSerializable
             if(nObjects > 0) setNext();
         }
 
+        ObjectIterator(int firstIndex, int number)
+        {
+            n = firstIndex;
+            sizeLimit = Math.min(firstIndex + number, size);
+            nObjects = sizeLimit - firstIndex;
+            if(nObjects > 0) setNext();
+        }
+
         private void setNext()
         {
             if(visibleOnly)
             {
                 if(type == -128)
                 {
-                    while(n < size)
+                    while(n < sizeLimit)
                     {
                         next = (StsMainObject)list[n++];
                        if(next.getIsVisible()) return;
@@ -437,7 +454,7 @@ public class StsObjectList extends StsList implements StsSerializable
                 }
                 else
                 {
-                    while(n < size)
+                    while(n < sizeLimit)
                     {
                         next = (StsMainObject)list[n++];
                         if(next.getIsVisible() && next.isType(type)) return;
@@ -448,7 +465,7 @@ public class StsObjectList extends StsList implements StsSerializable
             {
                 if(type != -128)
                 {
-                    while(n < size)
+                    while(n < sizeLimit)
                     {
                         next = (StsMainObject)list[n++];
                         if(next.isType(type)) return;
@@ -456,7 +473,7 @@ public class StsObjectList extends StsList implements StsSerializable
                 }
                 else
                 {
-                    while(n < size)
+                    while(n < sizeLimit)
                     {
                         next = (StsMainObject)list[n++];
                         return;
@@ -490,13 +507,13 @@ public class StsObjectList extends StsList implements StsSerializable
             if(visibleOnly)
             {
                 if(type == -128)
-                    while(n < size)
+                    while(n < sizeLimit)
                     {
                         object = (StsMainObject)list[n++];
                         if(object.getIsVisible()) nn++;
                     }
                 else
-                    while(n < size)
+                    while(n < sizeLimit)
                     {
                         object = (StsMainObject)list[n++];
                         if(object.getIsVisible() && object.isType(type)) nn++;
@@ -505,7 +522,7 @@ public class StsObjectList extends StsList implements StsSerializable
             else
             {
                 if(type != -128)
-                    while(n < size)
+                    while(n < sizeLimit)
                     {
                         object = (StsMainObject)list[n++];
                         if(object.isType(type)) nn++;

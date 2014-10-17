@@ -11,6 +11,7 @@ package com.Sts.Framework.DBTypes;
 import com.Sts.Framework.DB.DBCommand.*;
 import com.Sts.Framework.DB.*;
 import com.Sts.Framework.MVC.*;
+import com.Sts.Framework.Types.StsPoint;
 import com.Sts.Framework.Utilities.*;
 
 import java.awt.*;

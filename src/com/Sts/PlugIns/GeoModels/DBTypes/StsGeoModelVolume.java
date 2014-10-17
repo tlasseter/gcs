@@ -1,5 +1,6 @@
 package com.Sts.PlugIns.GeoModels.DBTypes;
 
+import com.Sts.Framework.DBTypes.StsObjectRefList;
 import com.Sts.Framework.Interfaces.MVC.StsVolumeDisplayable;
 import com.Sts.Framework.Interfaces.StsTreeObjectI;
 import com.Sts.Framework.Interfaces.StsXYGridable;
@@ -19,6 +20,8 @@ import java.io.Serializable;
  */
 public class StsGeoModelVolume extends StsRotatedGridBoundingBox implements StsTreeObjectI, StsXYGridable, Serializable, Cloneable
 {
+    protected StsObjectRefList channelSets;
+
     private boolean readoutEnabled = false;
 
     /** Indicates whether cube is time or depth */

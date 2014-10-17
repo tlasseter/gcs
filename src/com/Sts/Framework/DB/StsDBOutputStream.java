@@ -1,6 +1,7 @@
 package com.Sts.Framework.DB;
 
 import com.Sts.Framework.MVC.*;
+import com.Sts.Framework.Types.StsPoint;
 
 import java.io.*;
 
@@ -136,6 +137,23 @@ public class StsDBOutputStream extends ObjectOutputStream
 		super.writeUTF(value);
 	}
 
+    public void write(StsPoint[] points) throws IllegalAccessException, IOException
+    {
+        for (int i = 0; i < points.length; i++)
+        {
+            float[] v = points[i].v;
+            writeInt(v.length);
+            for (int j = 0; j < v.length; j++)
+                writeFloat(v[j]);
+        }
+    }
+
+    public void write(float[] floats) throws IllegalAccessException, IOException
+    {
+        for (int i = 0; i < floats.length; i++)
+            writeFloat(floats[i]);
+    }
+
     public void endDB()
     {
         dbFile.setPositionEndDB();
@@ -147,14 +165,21 @@ public class StsDBOutputStream extends ObjectOutputStream
 			String filename = "c:\\temp\\test.db";
 			FileOutputStream fos = new FileOutputStream(filename);
 			StsDBOutputStream out = new StsDBOutputStream(null, fos, null);
-/*
-			String s = "test";
-			out.write(s);
-			StsColor color = new StsColor(1.0f, 1.0f, 1.0f);
-			out.write(color);
-*/
-			out.flush();
-			fos.close();
+            int nBytes = 2000;
+            byte[] outBytes = new byte[nBytes];
+            for(int n = 0; n < nBytes; n++)
+                outBytes[n] = (byte)n;
+            out.write(outBytes);
+			//out.flush();
+			out.close();
+
+            FileInputStream fis = new FileInputStream(filename);
+            StsDBInputStream in = new StsDBInputStream(null, fis, null);
+            byte[] inBytes = new byte[nBytes];
+            int bytesRead = 0;
+            while(bytesRead < nBytes)
+                bytesRead += in.read(inBytes, bytesRead, nBytes-bytesRead);
+            in.close();
 		}
 		catch(Exception exc)
 		{

@@ -9,9 +9,13 @@ public interface StsRandomDistribFace
 {
     static public byte TYPE_LINEAR = 0;
     static public byte TYPE_GAUSS = 1;
+    static public byte TYPE_LOGNORM = 2;
+    static public byte TYPE_POISSON = 3;
     static public String LINEAR_STRING = "Linear";
     static public String GAUSS_STRING = "Gauss";
-    static public String[] typeStrings = new String[] { LINEAR_STRING, GAUSS_STRING };
+    static public String LOGNORM_STRING = "Log Normal";
+    static public String POISSON_STRING = "Poisson";
+    static public String[] typeStrings = new String[] { LINEAR_STRING, GAUSS_STRING, LOGNORM_STRING, POISSON_STRING };
 
     public double getAvg();
     public double getDev();

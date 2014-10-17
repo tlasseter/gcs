@@ -543,6 +543,7 @@ public class StsDBFile
                  if (transactionType == TRANSACTION_SAVE)
                  {
                      bos.write(transactionBytes);
+                     bos.flush();
                      if (debug)
                          System.out.println("FILE DEBUG: for transaction " + description + " readTransaction wrote " + transactionBytes.length + " bytes to file " +
                              filename);

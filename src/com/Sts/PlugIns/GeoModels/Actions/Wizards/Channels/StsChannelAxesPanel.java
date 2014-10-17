@@ -56,14 +56,14 @@ public class StsChannelAxesPanel extends StsJPanel
 
     private void constructBeans()
     {
-        channelWidthDistribBox = new StsRandomDistribGroupBox(channelWidthAvg, channelWidthDev, StsRandomDistribFace.TYPE_GAUSS, "Channel widths");
-        widthThicknessRatioDistribBox = new StsRandomDistribGroupBox(widthThickRatioAvg, widthThickRatioDev, StsRandomDistribFace.TYPE_GAUSS, "Channel width/thicknesses");
+        channelWidthDistribBox = new StsRandomDistribGroupBox(channelWidthAvg, channelWidthDev, StsRandomDistribFace.TYPE_LOGNORM, "Channel widths");
+        widthThicknessRatioDistribBox = new StsRandomDistribGroupBox(widthThickRatioAvg, widthThickRatioDev, StsRandomDistribFace.TYPE_LOGNORM, "Channel width/thicknesses");
 
-        channelsPerClusterDistribBox = new StsRandomDistribGroupBox(channelsPerClusterAvg, channelsPerClusterDev, StsRandomDistribFace.TYPE_GAUSS, "Channels per Cluster");
+        channelsPerClusterDistribBox = new StsRandomDistribGroupBox(channelsPerClusterAvg, channelsPerClusterDev, StsRandomDistribFace.TYPE_LOGNORM, "Channels per Cluster");
 
         float volumeXCenter = geoModelVolume.getXCenter();
         float volumeXSize = geoModelVolume.getXSize();
-        clusterDistribBox = new StsRandomDistribGroupBox(volumeXCenter, volumeXSize, StsRandomDistribFace.TYPE_LINEAR, "Cluster centers");
+        clusterDistribBox = new StsRandomDistribGroupBox(volumeXCenter, volumeXSize/2, StsRandomDistribFace.TYPE_LINEAR, "Cluster centers");
         lateralDistribBox = new StsRandomDistribGroupBox(0, volumeXSize/50, StsRandomDistribFace.TYPE_GAUSS, "Channel centers");
 
         directionDistribBox = new StsRandomDistribGroupBox(0, 10, StsRandomDistribFace.TYPE_GAUSS, "Channel directions");
@@ -94,7 +94,7 @@ public class StsChannelAxesPanel extends StsJPanel
 
     public void build()
     {
-        channelSet = new StsChannelSet(false);
+        channelSet = new StsChannelSet(geoModelVolume, false);
         float zMax = geoModelVolume.getZMax();
         float zMin = geoModelVolume.getZMin();
         int nSlices = geoModelVolume.getNSlices();
@@ -122,12 +122,13 @@ public class StsChannelAxesPanel extends StsJPanel
                 if(channelThickness < 0)  //hack until we put in Poisson
                     channelThickness = 0.001f;
 
-                channel = new StsChannel(channelWidth, channelThickness, new StsPoint(x0, y0, z), new StsPoint(x1, y1, z), direction);
+                channel = new StsChannel(channelSet, channelWidth, channelThickness, new StsPoint(x0, y0, z), new StsPoint(x1, y1, z), direction);
                 channelSet.addChannel(channel);
                 z -= channelThickness;
                 if (z < zMin)
                 {
                     addToProjectAndModel(channelSet);
+                    channelSet.setChannelsState(StsChannelSet.CHANNELS_AXES);
                     return;
                 }
             }
@@ -136,7 +137,7 @@ public class StsChannelAxesPanel extends StsJPanel
 
     public void buildStraightLines()
     {
-        channelSet = new StsChannelSet(false);
+        channelSet = new StsChannelSet(geoModelVolume, false);
         float zMax = geoModelVolume.getZMax();
         float zMin = geoModelVolume.getZMin();
         int nSlices = geoModelVolume.getNSlices();
@@ -161,7 +162,7 @@ public class StsChannelAxesPanel extends StsJPanel
                 float channelWidthThicknessRatio = (float)widthThicknessRatioDistribBox.getSample();
                 float channelWidth = (float)channelWidthDistribBox.getSample();
                 float channelThickness = channelWidth/channelWidthThicknessRatio;
-                channel = new StsChannel(channelWidth, channelThickness, new StsPoint(x0, y0, z), new StsPoint(x1, y1, z), direction);
+                channel = new StsChannel(channelSet, channelWidth, channelThickness, new StsPoint(x0, y0, z), new StsPoint(x1, y1, z), direction);
                 channelSet.addChannel(channel);
                 z -= channelThickness;
                 if (z < zMin)

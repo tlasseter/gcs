@@ -1,7 +1,12 @@
 package com.Sts.PlugIns.GeoModels.DBTypes;
 
+import com.Sts.Framework.DB.StsCustomSerializable;
+import com.Sts.Framework.DB.StsDBInputStream;
+import com.Sts.Framework.DB.StsDBOutputStream;
+import com.Sts.Framework.DB.StsObjectDBFileIO;
 import com.Sts.Framework.Interfaces.StsTreeObjectI;
 import com.Sts.Framework.Interfaces.StsXYGridable;
+import com.Sts.Framework.MVC.StsModel;
 import com.Sts.Framework.MVC.Views.StsGLPanel3d;
 import com.Sts.Framework.MVC.Views.StsView3d;
 import com.Sts.Framework.Types.StsColor;
@@ -9,13 +14,14 @@ import com.Sts.Framework.Types.StsPoint;
 import com.Sts.Framework.Types.StsRotatedGridBoundingBox;
 import com.Sts.Framework.UI.Beans.*;
 import com.Sts.Framework.UI.ObjectPanel.StsObjectPanel;
-import com.Sts.Framework.Utilities.StsException;
+import com.Sts.Framework.UI.StsMessageFiles;
 import com.Sts.Framework.Utilities.StsGLDraw;
-import com.Sts.Framework.Utilities.StsMath;
+import com.Sts.PlugIns.GeoModels.Types.StsChannelArcSegment;
 import com.Sts.PlugIns.GeoModels.Types.StsChannelLineSegment;
 import com.Sts.PlugIns.GeoModels.Types.StsChannelSegment;
 
 import javax.media.opengl.GL;
+import java.io.IOException;
 import java.io.Serializable;
 
 /**
@@ -23,14 +29,21 @@ import java.io.Serializable;
  * All Rights Reserved
  * No part of this website or any of its contents may be reproduced, copied, modified or adapted, without the prior written consent of the author, unless otherwise indicated for stand-alone materials.
  */
-public class StsChannel extends StsRotatedGridBoundingBox implements StsTreeObjectI, StsXYGridable, Serializable, Cloneable
+public class StsChannel extends StsRotatedGridBoundingBox implements StsTreeObjectI, StsXYGridable, Serializable, Cloneable, StsCustomSerializable
 {
+    private StsChannelSet channelSet;
     private float channelWidth;
     private float channelThickness;
     private StsPoint startPoint;
     private StsPoint endPoint;
     private float direction;
-    private StsChannelSegment[] channelSegments;
+
+    transient public StsChannelSegment[] channelSegments;
+
+    /** display list number for surface fill */
+    transient private int displayListNum = 0;
+    /** Display lists currently being used for surface geometry */
+    transient boolean usingDisplayLists = false;
 
     private boolean readoutEnabled = false;
     static protected StsObjectPanel objectPanel = null;
@@ -56,8 +69,9 @@ public class StsChannel extends StsRotatedGridBoundingBox implements StsTreeObje
 
     public StsChannel() { }
 
-    public StsChannel(float channelWidth, float channelThickness, StsPoint firstPoint, StsPoint lastPoint, float direction)
+    public StsChannel(StsChannelSet channelSet, float channelWidth, float channelThickness, StsPoint firstPoint, StsPoint lastPoint, float direction)
     {
+        this.channelSet = channelSet;
         this.channelWidth = channelWidth;
         this.channelThickness = channelThickness;
         this.startPoint = firstPoint;
@@ -65,18 +79,68 @@ public class StsChannel extends StsRotatedGridBoundingBox implements StsTreeObje
         this.direction = direction;
     }
 
-    public void display(StsGLPanel3d glPanel3d)
+    public boolean initialize(StsModel model)
     {
-        if(channelSegments == null || channelSegments.length == 0)
+        if(channelSegments == null) return true;
+        for(StsChannelSegment channelSegment : channelSegments)
+            if(!channelSegment.computePoints()) return false;
+        return true;
+    }
+
+    public void display(StsGLPanel3d glPanel3d, boolean displayCenterLinePoints, boolean displayAxes)
+    {
+        GL gl = glPanel3d.getGL();
+
+        byte channelsState = channelSet.getChannelsState();
+        if(channelsState == StsChannelSet.CHANNELS_AXES || displayAxes)
         {
-            GL gl = glPanel3d.getGL();
-            if (gl == null) return;
             StsGLDraw.drawLine(gl, StsColor.RED, true, new StsPoint[] { startPoint, endPoint});
         }
-        else
+        else if(channelsState == StsChannelSet.CHANNELS_ARCS)
         {
-            for (StsChannelSegment channelSegment : channelSegments)
-                channelSegment.display(glPanel3d);
+            if (!currentModel.useDisplayLists && usingDisplayLists)
+            {
+                deleteDisplayLists(gl);
+                usingDisplayLists = false;
+            }
+
+            if (currentModel.useDisplayLists)
+            {
+                if (displayListNum == 0) // build display list
+                {
+                    displayListNum = gl.glGenLists(1);
+                    if (displayListNum == 0)
+                    {
+                        StsMessageFiles.logMessage("System Error in StsChannel.display(): " + "Failed to allocate a display list");
+                        return;
+                    }
+                    gl.glNewList(displayListNum, GL.GL_COMPILE_AND_EXECUTE);
+                    drawChannelSegments(gl, displayCenterLinePoints);
+                    gl.glEndList();
+
+                    //timer.stop("display list surface setup: ");
+                }
+                gl.glCallList(displayListNum);
+            }
+            else
+                drawChannelSegments(gl, displayCenterLinePoints);
+
+        }
+    }
+
+    private void drawChannelSegments(GL gl, boolean displayCenterLinePoints)
+    {
+        for (StsChannelSegment channelSegment : channelSegments)
+            channelSegment.display(gl, displayCenterLinePoints);
+
+    }
+
+    public void deleteDisplayLists(GL gl)
+    {
+        if (displayListNum > 0)
+        {
+            gl.glDeleteLists(displayListNum, 1);
+            displayListNum = 0;
         }
     }
 
@@ -145,4 +209,76 @@ public class StsChannel extends StsRotatedGridBoundingBox implements StsTreeObje
     {
         return direction;
     }
+
+    public byte getZDomainSupported()
+    {
+        return channelSet.getZDomainSupported();
+    }
+    // type of segment: 1 is line and 2 is arc
+    byte[] segmentTypes;
+    // Starting points for lines and arcs.
+    StsPoint[] startPoints;
+    // Starting direction for lines and arcs.  0 is in the +Y direction, +90 is -X, -90 is +X, -180 & +180 are -Y.
+    float[] startDirections;
+    // The length of lineSegments and the radius of arcSegments.
+    float[] sizes;
+    // Arc length of arcSegments.  Plus arcs are CW and minus arcs are CCW.
+    float[] arcs;
+
+    public void writeObject(StsDBOutputStream out) throws IllegalAccessException, IOException
+    {
+        if(channelSegments == null)
+        {
+            out.writeInt(0);
+            return;
+        }
+        int nSegments = channelSegments.length;
+        out.writeInt(nSegments);
+
+        segmentTypes = new byte[nSegments];
+        startPoints = new StsPoint[nSegments];
+        startDirections = new float[nSegments];
+        sizes = new float[nSegments];
+        arcs = new float[nSegments];
+
+        for(int n = 0; n < nSegments; n++)
+            channelSegments[n].fillSerializableArrays(n, segmentTypes, startPoints, startDirections, sizes, arcs);
+
+        out.write(segmentTypes);
+        out.write(startPoints);
+        out.write(startDirections);
+        out.write(sizes);
+        out.write(arcs);
+        out.flush();
+
+    }
+
+    public void readObject(StsDBInputStream in) throws IllegalAccessException, IOException
+    {
+        int nSegments = in.readInt();
+        if(nSegments == 0) return;
+
+
+        segmentTypes = new byte[nSegments];
+        in.readBytes(segmentTypes);
+        startPoints = new StsPoint[nSegments];
+        in.read(startPoints);
+        startDirections = new float[nSegments];
+        in.read(startDirections);
+        sizes = new float[nSegments];
+        in.read(sizes);
+        arcs = new float[nSegments];
+        in.read(arcs);
+
+        channelSegments = new StsChannelSegment[nSegments];
+        for(int n = 0; n < nSegments; n++)
+        {
+            if(segmentTypes[n] == StsChannelSegment.ARC)
+                channelSegments[n] = new StsChannelArcSegment(startDirections[n], sizes[n], arcs[n], startPoints[n]);
+            else
+                channelSegments[n] = new StsChannelLineSegment(startPoints[n], startDirections[n], sizes[n]);
+        }
+    }
+
+    public void exportObject(StsObjectDBFileIO objectIO) { }
 }

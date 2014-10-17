@@ -140,5 +140,6 @@ public class StsByteFile
     public void write(byte[] bytes) throws IOException
     {
         os.write(bytes);
+        os.flush();
     }
 }

@@ -8,8 +8,7 @@ import com.Sts.Framework.Interfaces.MVC.*;
 import com.Sts.Framework.Interfaces.StsTreeObjectI;
 import com.Sts.PlugIns.Seismic.DBTypes.StsSeismicVolume;
 
-public class StsGeoModelVolumeClass extends StsModelObjectPanelClass implements StsSerializable, StsTreeObjectI, StsRotatedClass,
-        StsClassDisplayable, StsClassObjectSelectable
+public class StsGeoModelVolumeClass extends StsModelObjectPanelClass implements StsSerializable, StsTreeObjectI, StsRotatedClass, StsClassObjectSelectable
 {
     private boolean fillPlaneNulls = false;
 

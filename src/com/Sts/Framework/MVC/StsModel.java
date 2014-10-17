@@ -1690,6 +1690,12 @@ public class StsModel extends StsSerialize
 		wc.viewObjectRepaint(source, object);
 	}
 
+    public void repaintWin3d()
+    {
+        if(win3d == null) return;
+        win3d.repaint();
+    }
+
 	public void repaintViews(Class viewClass)
 	{
 		if(!displayOK) return;

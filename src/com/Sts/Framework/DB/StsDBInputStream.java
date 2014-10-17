@@ -2,6 +2,7 @@ package com.Sts.Framework.DB;
 
 import com.Sts.Framework.DBTypes.*;
 import com.Sts.Framework.MVC.*;
+import com.Sts.Framework.Types.StsPoint;
 import com.Sts.Framework.Utilities.*;
 
 import java.io.*;
@@ -356,6 +357,44 @@ public class StsDBInputStream extends ObjectInputStream
             return "bad";
         }
 	}
+
+    public void read(float[] floats) throws IOException
+    {
+        int size = floats.length;
+        for(int n = 0; n < size; n++)
+            floats[n] = readFloat();
+    }
+
+    public void read(StsPoint[] points) throws IllegalAccessException, IOException
+    {
+        for (int i = 0; i < points.length; i++)
+        {
+            int vLength = readInt();
+            float[] v = new float[vLength];
+            for (int j = 0; j < vLength; j++)
+                v[j] = readFloat();
+            points[i] = new StsPoint(v);
+        }
+    }
+
+    /** The read(byte[]) method in InputStream reads only a buffer worth of bytes, so must be buffered as here to be useful. */
+    public int readBytes(byte[] bytes)
+    {
+        int nBytes = 0;
+        int bytesRead = 0;
+        try
+        {
+            nBytes = bytes.length;
+            bytesRead = 0;
+            while (bytesRead < nBytes)
+                bytesRead += read(bytes, bytesRead, nBytes - bytesRead);
+        }
+        catch(IOException ioe)
+        {
+            StsException.outputWarningException(this, "readBytes", "Failed reading " + nBytes + " bytes. Read only " + bytesRead, ioe);
+        }
+        return bytesRead;
+    }
 
 	private class InputDBClasses extends StsDBObjectTypeList
 	{

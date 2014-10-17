@@ -2465,6 +2465,31 @@ public class StsGLDraw
         }
     }
 
+    static public void drawPoints(StsPoint[] points, StsColor color, GL gl, int size)
+    {
+        try
+        {
+            if (points == null) return;
+            int nPnts = points.length;
+            color.setGLColor(gl);
+
+            gl.glPointSize((float) size);
+            gl.glDisable(GL.GL_LIGHTING);
+            gl.glBegin(GL.GL_POINTS);
+            for (int n = 0; n < nPnts; n++)
+                gl.glVertex3fv(points[n].v, 0);
+        }
+        catch (Exception e)
+        {
+            StsException.outputException("StsGLDraw.drawPoints() failed.", e, StsException.WARNING);
+        }
+        finally
+        {
+            gl.glEnd();
+            gl.glEnable(GL.GL_LIGHTING);
+        }
+    }
+
     /** draw a well line segment */
     public static void drawWellLineSegment(GL gl, StsColor color,
                                            boolean highlighted, StsPoint[] points, int start, int end,

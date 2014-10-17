@@ -528,6 +528,12 @@ public class StsPoint extends StsSerialize implements Cloneable, StsSerializable
 		return (float) Math.sqrt(distanceSquared(otherPoint));
 	}
 
+    /** distance from this point to an otherPoint */
+    public float distanceXY(StsPoint otherPoint)
+    {
+        return (float) Math.sqrt(distanceSquared(otherPoint, 2));
+    }
+
 	/** angle from this point to an otherPoint */
 	public double fromAngle(StsPoint otherPoint)
 	{
@@ -536,6 +542,13 @@ public class StsPoint extends StsSerialize implements Cloneable, StsSerializable
 		return StsMath.atan2(dx, dy);
 	}
 
+    /** angle from this point to an otherPoint */
+    public static double vectorAngle(StsPoint point0, StsPoint point1)
+    {
+        double dx = point1.v[X] - point0.v[X];
+        double dy = point1.v[Y] - point0.v[Y];
+        return StsMath.atan2(dx, dy);
+    }
 	/** dip from this point to an otherPoint */
 	public float fromDip(StsPoint otherPoint)
 	{

@@ -19,7 +19,13 @@ import java.util.ArrayList;
  */
 public class StsChannelSet extends StsRotatedGridBoundingBox implements StsTreeObjectI, Serializable, Cloneable
 {
+    private StsGeoModelVolume geoModelVolume;
     private StsObjectRefList channels = null;
+    private byte channelsState = CHANNELS_NONE;
+
+    static public byte CHANNELS_NONE = 0;
+    static public byte CHANNELS_AXES = 1;
+    static public byte CHANNELS_ARCS = 2;
 
     static public final StsFieldBean[] displayFields =
     {
@@ -35,15 +41,21 @@ public class StsChannelSet extends StsRotatedGridBoundingBox implements StsTreeO
 
     public StsChannelSet() { }
 
-    public StsChannelSet(boolean persistent)
+    public StsChannelSet(StsGeoModelVolume geoModelVolume, boolean persistent)
     {
         super(persistent);
+        this.geoModelVolume = geoModelVolume;
     }
 
     public void addChannel(StsChannel channel)
     {
         if(channels == null) channels = StsObjectRefList.constructor(100, 100, "channels", this);
         channels.add(channel);
+    }
+
+    public byte getZDomainSupported()
+    {
+        return geoModelVolume.getZDomainSupported();
     }
 
     public StsFieldBean[] getDisplayFields() { return displayFields; }
@@ -80,5 +92,15 @@ public class StsChannelSet extends StsRotatedGridBoundingBox implements StsTreeO
     public StsObjectRefList getChannels()
     {
         return channels;
+    }
+
+    public byte getChannelsState()
+    {
+        return channelsState;
+    }
+
+    public void setChannelsState(byte channelsState)
+    {
+        this.channelsState = channelsState;
     }
 }

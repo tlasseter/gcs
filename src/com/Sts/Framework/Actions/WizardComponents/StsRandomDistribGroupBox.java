@@ -25,6 +25,10 @@ public class StsRandomDistribGroupBox extends StsGroupBox implements StsRandomDi
     protected double dev;
     protected int count;
     protected byte type;
+    protected double logAvg;
+    protected double logDev;
+
+    public double lastSample;
 
     private StsComboBoxFieldBean typeBean;
     private StsIntFieldBean countBean = null;
@@ -33,21 +37,13 @@ public class StsRandomDistribGroupBox extends StsGroupBox implements StsRandomDi
     private Random random = new Random();
     static private String[] typeStrings = StsRandomDistribFace.typeStrings;
 
-    public StsRandomDistribGroupBox(double avg, double dev, int count, byte type, String valueName)
-    {
-        super(valueName + " Distribution");
-        this.avg = avg;
-        this.dev = dev;
-        this.count = count;
-        this.type = type;
-        buildPanel();
-    }
-
     public StsRandomDistribGroupBox(double avg, double dev, byte type, String valueName)
     {
         super(valueName + " Distribution");
         this.avg = avg;
         this.dev = dev;
+        logAvg = Math.log(avg);
+        logDev = Math.log(avg + dev) - logAvg;
         this.count = -1;
         this.type = type;
         constructBeans();
@@ -57,17 +53,18 @@ public class StsRandomDistribGroupBox extends StsGroupBox implements StsRandomDi
     private void constructBeans()
     {
         typeBean = new StsComboBoxFieldBean(this, "type", "Type: ", StsRandomDistribFace.typeStrings);
-        if(count != -1)
+        if (count != -1)
             countBean = new StsIntFieldBean(this, "count", 0, 1000000, "Num Samples:", true);
         avgBean = new StsDoubleFieldBean(this, "avg", true, "Average:", true);
         devBean = new StsDoubleFieldBean(this, "dev", 0, Double.MAX_VALUE, "Std Dev:", true);
     }
+
     private void buildPanel()
     {
         gbc.fill = HORIZONTAL;
 
         addBeanToRow(typeBean);
-        if(countBean != null)
+        if (countBean != null)
             addBeanEndRow(countBean);
         addBeanToRow(avgBean);
         addBeanEndRow(devBean);
@@ -75,13 +72,42 @@ public class StsRandomDistribGroupBox extends StsGroupBox implements StsRandomDi
 
     public double getSample()
     {
-        if(type == StsRandomDistribFace.TYPE_GAUSS)
-            return avg + dev*random.nextGaussian();
-        else
+        if (type == StsRandomDistribFace.TYPE_GAUSS)
+            lastSample = avg + dev * random.nextGaussian();
+        else if (type == StsRandomDistribFace.TYPE_LINEAR)
         {
             double value = random.nextDouble();
-            return avg + dev * (value - 0.5);
+            lastSample = avg + 2 * dev * (value - 0.5);
         }
+        else if (type == StsRandomDistribFace.TYPE_LOGNORM)
+        {
+            lastSample = staticLogNormal(random, logAvg, logDev);
+        }
+        else // TYPE_POISSON
+        {
+            lastSample = staticPoisson(random, avg);
+        }
+        return lastSample;
+    }
+
+    static double staticLogNormal(Random random, double logAvg, double logDev)
+    {
+        double logValue =  logAvg + logDev * random.nextGaussian();
+        return Math.exp(logValue);
+    }
+
+    static double staticPoisson(Random random, double avg)
+    {
+        int k = 0;
+        double p = 1.0;
+        double L = Math.exp(-avg);
+        do
+        {
+            k++;
+            p *= random.nextDouble();
+        }
+        while (p >= L);
+        return k - 1;
     }
 
     @Override
@@ -125,5 +151,37 @@ public class StsRandomDistribGroupBox extends StsGroupBox implements StsRandomDi
     public void setType(String typeString)
     {
         this.type = StsParameters.getByteIndexFromString(typeString, typeStrings);
+    }
+
+    static public void main(String[] args)
+    {
+        // test poisson distribution
+        int nValues = 1000;
+        double avg = 100;
+        double dev = 100;
+        int[] frequency = new int[1000];
+        Random random = new Random();
+
+        double logAvg = Math.log(avg);
+        double logDev = Math.log(avg + dev) - logAvg;
+
+        for(int n = 0; n < nValues; n++)
+        {
+            int value = (int)staticLogNormal(random, logAvg, logDev);
+            value = Math.min(value, 999);
+            frequency[value]++;
+        }
+        System.out.println("Results: 1 - " +  frequency[1] + " 10 - " + frequency[10] + " 50 - " + frequency[50] + " 100 - " +
+                frequency[100] + " 200 - " + frequency[200] + " 500 - " + frequency[500]);
+
+     /* poisson
+        for(int n = 0; n < nValues; n++)
+        {
+            int value = (int)staticPoisson(random, avg);
+            frequency[value]++;
+        }
+        System.out.println("Results: 1 - " +  frequency[1] + " 10 - " + frequency[10] + " 50 - " + frequency[50] + " 100 - " +
+                frequency[100] + " 200 - " + frequency[200] + " 500 - " + frequency[500]);
+     */
     }
 }

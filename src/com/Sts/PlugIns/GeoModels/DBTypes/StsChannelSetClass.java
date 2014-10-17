@@ -7,7 +7,7 @@ import com.Sts.Framework.Interfaces.MVC.StsClassDisplayable;
 import com.Sts.Framework.Interfaces.MVC.StsRotatedClass;
 import com.Sts.Framework.Interfaces.StsTreeObjectI;
 
-public class StsChannelSetClass extends StsModelObjectPanelClass implements StsSerializable, StsTreeObjectI, StsRotatedClass, StsClassDisplayable
+public class StsChannelSetClass extends StsModelObjectPanelClass implements StsSerializable, StsTreeObjectI, StsRotatedClass
 {
     public StsChannelSetClass()
     {
