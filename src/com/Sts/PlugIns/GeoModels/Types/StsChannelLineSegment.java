@@ -1,8 +1,10 @@
 package com.Sts.PlugIns.GeoModels.Types;
 
+import com.Sts.Framework.MVC.Views.StsGLPanel3d;
 import com.Sts.Framework.Types.StsColor;
 import com.Sts.Framework.Types.StsPoint;
 import com.Sts.Framework.Utilities.StsGLDraw;
+import com.Sts.PlugIns.GeoModels.DBTypes.StsChannel;
 
 import javax.media.opengl.GL;
 
@@ -17,10 +19,9 @@ public class StsChannelLineSegment extends StsChannelSegment
 
     public StsChannelLineSegment() { }
 
-    public StsChannelLineSegment(StsPoint startPoint, float startDirection, float length)
+    public StsChannelLineSegment(StsChannel channel, StsPoint startPoint, float startDirection, float length)
     {
-        this.startPoint = startPoint;
-        this.startDirection = startDirection;
+        super(channel, startDirection, startPoint);
         this.length = length;
         computePoints();
     }
@@ -33,16 +34,32 @@ public class StsChannelLineSegment extends StsChannelSegment
     public boolean computePoints()
     {
         StsPoint endPoint = startPoint.addXYVector(startDirection + 90, length);
-        points = new StsPoint[] { startPoint, endPoint};
+        float halfWidth = channel.getChannelWidth()/2;
+        StsPoint innerPoint0 = startPoint.addXYVector(startDirection, halfWidth);
+        StsPoint outerPoint0 = startPoint.addXYVector(startDirection+180, halfWidth);
+        StsPoint innerPoint1 = endPoint.addXYVector(startDirection, halfWidth);
+        StsPoint outerPoint1 = endPoint.addXYVector(startDirection+180, halfWidth);
+        centerLinePoints = new StsPoint[] { startPoint, endPoint };
+        innerPoints = new StsPoint[] { innerPoint0, innerPoint1 };
+        outerPoints = new StsPoint[] { outerPoint0, outerPoint1 };
         return true;
     }
 
-    public void display(GL gl, boolean displayCenterLinePoints)
+    public void display(StsGLPanel3d glPanel3d, boolean displayCenterLinePoints, boolean drawFilled, StsColor stsColor)
     {
-        if (gl == null) return;
-        StsGLDraw.drawLine(gl, StsColor.GREEN, true, points);
-        if(displayCenterLinePoints)
-            StsGLDraw.drawPoint(gl, points[0].v, StsColor.GREEN, 6);
+        GL gl = glPanel3d.getGL();
+
+        if (gl == null || centerLinePoints == null) return;
+
+        StsGLDraw.drawLine(gl, stsColor, true, centerLinePoints);
+        if (displayCenterLinePoints)
+        {
+            glPanel3d.setViewShift(gl, 1.0f);
+            StsGLDraw.drawPoint(gl, centerLinePoints[0].v, StsColor.WHITE, 6);
+            glPanel3d.resetViewShift(gl);
+        }
+        if(drawFilled)
+            StsGLDraw.drawTwoLineStrip(gl, innerPoints, outerPoints, innerPoints.length);
     }
 
     public void fillSerializableArrays(int index, byte[] segmentTypes, StsPoint[] startPoints, float[] startDirections, float[] sizes, float[] arcs)

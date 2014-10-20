@@ -38,8 +38,6 @@ public class StsPatch
     private static final int STRIP_LEFT = StsParameters.STRIP_BOT;
     private static final int STRIP_RIGHT = StsParameters.STRIP_TOP;
 
-    private static final float[] verticalNormal = new float[] { 0.0f, 0.0f, 1.0f };
-
     static final boolean debug = false;
 
     public StsPatch(int nRows, int nCols, StsSection section)
@@ -378,7 +376,7 @@ public class StsPatch
             StsException.outputException("StsPatch.getNormal() failed for rowF " + rowF + " colF " + colF +
                 " nRows " + nRows + " nCols " + nCols,
                 e, StsException.WARNING);
-            return verticalNormal;
+            return StsGLDraw.verticalNormal;
         }
     }
 

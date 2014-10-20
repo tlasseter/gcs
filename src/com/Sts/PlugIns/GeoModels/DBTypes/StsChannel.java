@@ -37,9 +37,12 @@ public class StsChannel extends StsRotatedGridBoundingBox implements StsTreeObje
     private StsPoint startPoint;
     private StsPoint endPoint;
     private float direction;
+    /** persisted index of color in spectrum */
+    protected int nColor = 0;
 
     transient public StsChannelSegment[] channelSegments;
-
+    /** color for this channel */
+    transient StsColor stsColor;
     /** display list number for surface fill */
     transient private int displayListNum = 0;
     /** Display lists currently being used for surface geometry */
@@ -47,6 +50,9 @@ public class StsChannel extends StsRotatedGridBoundingBox implements StsTreeObje
 
     private boolean readoutEnabled = false;
     static protected StsObjectPanel objectPanel = null;
+
+    /** these are colors used in drawing line; actual color is defined by nColor */
+    static public StsColor[] colorList = StsColor.basic32Colors;
 
     static public final StsFieldBean[] displayFields =
     {
@@ -77,24 +83,27 @@ public class StsChannel extends StsRotatedGridBoundingBox implements StsTreeObje
         this.startPoint = firstPoint;
         this.endPoint = lastPoint;
         this.direction = direction;
+        nColor = getIndex() % 32;
+        stsColor = colorList[nColor];
     }
 
     public boolean initialize(StsModel model)
     {
         if(channelSegments == null) return true;
+        stsColor = colorList[nColor];
         for(StsChannelSegment channelSegment : channelSegments)
             if(!channelSegment.computePoints()) return false;
         return true;
     }
 
-    public void display(StsGLPanel3d glPanel3d, boolean displayCenterLinePoints, boolean displayAxes)
+    public void display(StsGLPanel3d glPanel3d, boolean displayCenterLinePoints, boolean displayAxes, boolean drawFilled)
     {
         GL gl = glPanel3d.getGL();
 
         byte channelsState = channelSet.getChannelsState();
         if(channelsState == StsChannelSet.CHANNELS_AXES || displayAxes)
         {
-            StsGLDraw.drawLine(gl, StsColor.RED, true, new StsPoint[] { startPoint, endPoint});
+            StsGLDraw.drawLine(gl, stsColor, true, new StsPoint[] { startPoint, endPoint});
         }
         else if(channelsState == StsChannelSet.CHANNELS_ARCS)
         {
@@ -115,7 +124,7 @@ public class StsChannel extends StsRotatedGridBoundingBox implements StsTreeObje
                         return;
                     }
                     gl.glNewList(displayListNum, GL.GL_COMPILE_AND_EXECUTE);
-                    drawChannelSegments(gl, displayCenterLinePoints);
+                    drawChannelSegments(glPanel3d, displayCenterLinePoints, drawFilled);
                     gl.glEndList();
 
                     //timer.stop("display list surface setup: ");
@@ -123,16 +132,15 @@ public class StsChannel extends StsRotatedGridBoundingBox implements StsTreeObje
                 gl.glCallList(displayListNum);
             }
             else
-                drawChannelSegments(gl, displayCenterLinePoints);
+                drawChannelSegments(glPanel3d, displayCenterLinePoints, drawFilled);
 
         }
     }
 
-    private void drawChannelSegments(GL gl, boolean displayCenterLinePoints)
+    private void drawChannelSegments(StsGLPanel3d glPanel3d, boolean displayCenterLinePoints, boolean drawFilled)
     {
         for (StsChannelSegment channelSegment : channelSegments)
-            channelSegment.display(gl, displayCenterLinePoints);
-
+            channelSegment.display(glPanel3d, displayCenterLinePoints, drawFilled, stsColor);
     }
 
     public void deleteDisplayLists(GL gl)
@@ -274,9 +282,9 @@ public class StsChannel extends StsRotatedGridBoundingBox implements StsTreeObje
         for(int n = 0; n < nSegments; n++)
         {
             if(segmentTypes[n] == StsChannelSegment.ARC)
-                channelSegments[n] = new StsChannelArcSegment(startDirections[n], sizes[n], arcs[n], startPoints[n]);
+                channelSegments[n] = new StsChannelArcSegment(this, startDirections[n], sizes[n], arcs[n], startPoints[n]);
             else
-                channelSegments[n] = new StsChannelLineSegment(startPoints[n], startDirections[n], sizes[n]);
+                channelSegments[n] = new StsChannelLineSegment(this, startPoints[n], startDirections[n], sizes[n]);
         }
     }
 

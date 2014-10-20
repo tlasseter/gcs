@@ -19,7 +19,7 @@ public class StsChannelClass extends StsModelObjectPanelClass implements StsSeri
     private boolean displayCenterLinePoints = false;
     private boolean displayChanged = false;
     private int numberInSelectedGroup = 5;
-
+    private boolean drawFilled = false;
     public StsChannelClass()
     {
     }
@@ -31,7 +31,8 @@ public class StsChannelClass extends StsModelObjectPanelClass implements StsSeri
             new StsBooleanFieldBean(this, "displayAxes", "Display channel axes only"),
             new StsBooleanFieldBean(this, "displaySelectedChannel", "Display selected channel"),
             new StsBooleanFieldBean(this, "displayCenterLinePoints", "Display points"),
-            new StsIntFieldBean(this, "numberInSelectedGroup", 1, 10, "Number to display")
+            new StsIntFieldBean(this, "numberInSelectedGroup", 1, 10, "Number to display"),
+            new StsBooleanFieldBean(this, "drawFilled", "Display filled."),
         };
     }
 
@@ -59,14 +60,14 @@ public class StsChannelClass extends StsModelObjectPanelClass implements StsSeri
             if(numberInSelectedGroup == 1)
             {
                 StsChannel channel = (StsChannel)getCurrentObject();
-                channel.display(glPanel3d, displayCenterLinePoints, displayAxes);
+                channel.display(glPanel3d, displayCenterLinePoints, displayAxes, drawFilled);
             }
             else
             {
                 StsChannel channel = (StsChannel) getCurrentObject();
                 Iterator<StsChannel> iter = getChannelGroupIterator(channel);
                 while (iter.hasNext())
-                    iter.next().display(glPanel3d, displayCenterLinePoints, displayAxes);
+                    iter.next().display(glPanel3d, displayCenterLinePoints, displayAxes, drawFilled);
             }
         }
         else
@@ -75,7 +76,7 @@ public class StsChannelClass extends StsModelObjectPanelClass implements StsSeri
             while (iter.hasNext())
             {
                 StsChannel channel = (StsChannel) iter.next();
-                channel.display(glPanel3d, displayCenterLinePoints, displayAxes);
+                channel.display(glPanel3d, displayCenterLinePoints, displayAxes, drawFilled);
             }
         }
     }
@@ -131,6 +132,18 @@ public class StsChannelClass extends StsModelObjectPanelClass implements StsSeri
     public void setDisplayAxes(boolean displayAxes)
     {
         this.displayAxes = displayAxes;
+        currentModel.repaintWin3d();
+    }
+
+    public boolean isDrawFilled()
+    {
+        return drawFilled;
+    }
+
+    public void setDrawFilled(boolean drawFilled)
+    {
+        this.drawFilled = drawFilled;
+        displayChanged = true;
         currentModel.repaintWin3d();
     }
 }

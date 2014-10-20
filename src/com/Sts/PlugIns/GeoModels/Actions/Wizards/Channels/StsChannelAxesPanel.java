@@ -35,6 +35,7 @@ public class StsChannelAxesPanel extends StsJPanel
     static int channelsPerClusterAvg = 20;
     static int channelsPerClusterDev = 5;
 
+    static float channelZIncThicknessFraction = 0.25f;
 
     private StsChannelSet channelSet;
 
@@ -124,7 +125,7 @@ public class StsChannelAxesPanel extends StsJPanel
 
                 channel = new StsChannel(channelSet, channelWidth, channelThickness, new StsPoint(x0, y0, z), new StsPoint(x1, y1, z), direction);
                 channelSet.addChannel(channel);
-                z -= channelThickness;
+                z -= channelThickness*channelZIncThicknessFraction;
                 if (z < zMin)
                 {
                     addToProjectAndModel(channelSet);

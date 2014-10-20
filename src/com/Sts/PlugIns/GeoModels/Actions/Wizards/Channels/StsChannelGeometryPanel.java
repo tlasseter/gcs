@@ -32,16 +32,16 @@ public class StsChannelGeometryPanel extends StsJPanel
     private StsChannelGeometryStep wizardStep;
     private StsGeoModelVolume geoModelVolume;
 
-    private StsRandomDistribGroupBox channelArcRadiusDistribBox, channelArcAngleDistribBox;
-    private StsRandomDistribGroupBox channelLineLengthDistribBox;
+    private StsRandomDistribGroupBox channelArcRadiusDivWidthDistribBox, channelArcAngleDistribBox;
+    private StsRandomDistribGroupBox channelLineLengthDivWidthDistribBox;
     private StsButtonFieldBean buildButton;
 
-    static float channelArcRadiusAvg = 100;
-    static float channelArcRadiusDev = 40;
+    static float channelArcRadiusDivWidthAvg = 5;
+    static float channelArcRadiusDivWidthDev = 2;
     static float channelArcAngleAvg = 135;
     static float channelArcAngleDev = 45;
-    static float channelLineLengthAvg = 50;
-    static float channelLineLengthDev = 20;
+    static float channelLineLengthDivWidthAvg = 4;
+    static float channelLineLengthDivWidthDev = 2;
 
     static byte LINE = 1;
     static byte ARC = 2;
@@ -67,9 +67,9 @@ public class StsChannelGeometryPanel extends StsJPanel
 
     private void constructBeans()
     {
-        channelArcRadiusDistribBox = new StsRandomDistribGroupBox(channelArcRadiusAvg, channelArcRadiusDev, StsRandomDistribFace.TYPE_LOGNORM, "Channel arc radius/width");
+        channelArcRadiusDivWidthDistribBox = new StsRandomDistribGroupBox(channelArcRadiusDivWidthAvg, channelArcRadiusDivWidthDev, StsRandomDistribFace.TYPE_LOGNORM, "Channel arc radius/width");
         channelArcAngleDistribBox = new StsRandomDistribGroupBox(channelArcAngleAvg, channelArcAngleDev, StsRandomDistribFace.TYPE_GAUSS, "Channel arc angle");
-        channelLineLengthDistribBox = new StsRandomDistribGroupBox(channelLineLengthAvg, channelLineLengthDev, StsRandomDistribFace.TYPE_LOGNORM, "Channel line length");
+        channelLineLengthDivWidthDistribBox = new StsRandomDistribGroupBox(channelLineLengthDivWidthAvg, channelLineLengthDivWidthDev, StsRandomDistribFace.TYPE_LOGNORM, "Channel line/width length");
         buildButton = new StsButtonFieldBean("Build", "Execute build for this set.", this, "build");
     }
 
@@ -83,9 +83,9 @@ public class StsChannelGeometryPanel extends StsJPanel
         removeAll();
 
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        addEndRow(channelArcRadiusDistribBox);
+        addEndRow(channelArcRadiusDivWidthDistribBox);
         addEndRow(channelArcAngleDistribBox);
-        addEndRow(channelLineLengthDistribBox);
+        addEndRow(channelLineLengthDivWidthDistribBox);
         addEndRow(buildButton);
         wizard.rebuild();
     }
@@ -114,13 +114,14 @@ public class StsChannelGeometryPanel extends StsJPanel
             float segmentDirection = channelDirection;
             boolean isArc = false; // first segment will be line
             StsPoint lastPoint = startPoint;
+            float channelWidth = channel.getChannelWidth();
             StsChannelSegment segment;
             ArrayList<StsChannelSegment> segments = new ArrayList<>();
             while(insideVolume(geoModelVolume, lastPoint))
             {
                 if(isArc)
                 {
-                    float radius = (float)channelArcRadiusDistribBox.getSample();
+                    float radius = (float)channelArcRadiusDivWidthDistribBox.getSample()*channelWidth;
                     float arcAngle = (float)channelArcAngleDistribBox.getSample();
                     // rotation angle is angle from current segmentDirection back to channel direction
                     double rotationAngle = StsChannelArcSegment.subtractAngles(segmentDirection, channelDirection);
@@ -143,7 +144,7 @@ public class StsChannelGeometryPanel extends StsJPanel
                     else if (nextRotationAngle > limitRotateAngle)
                         arcAngle -= nextRotationAngle - limitRotateAngle;
 
-                    segment = new StsChannelArcSegment(segmentDirection, radius, arcAngle, lastPoint);
+                    segment = new StsChannelArcSegment(channel, segmentDirection, radius, arcAngle, lastPoint);
                     segments.add(segment);
                     lastPoint = segment.getLastPoint();
 
@@ -154,8 +155,8 @@ public class StsChannelGeometryPanel extends StsJPanel
                 {
                     if(StsMath.betweenInclusive(segmentDirection, -limitAddLineAngle, limitAddLineAngle))
                     {
-                        float length = (float) channelLineLengthDistribBox.getSample();
-                        segment = new StsChannelLineSegment(lastPoint, segmentDirection, length);
+                        float length = (float) channelLineLengthDivWidthDistribBox.getSample()*channelWidth;
+                        segment = new StsChannelLineSegment(channel, lastPoint, segmentDirection, length);
                         segments.add(segment);
                         lastPoint = segment.getLastPoint();
                     }
@@ -187,7 +188,7 @@ public class StsChannelGeometryPanel extends StsJPanel
             {
                 if(isArc)
                 {
-                    float radius = (float)channelArcRadiusDistribBox.getSample();
+                    float radius = (float) channelArcRadiusDivWidthDistribBox.getSample();
                     float arcAngle = (float)channelArcAngleDistribBox.getSample();
                     double rotationAngle = StsChannelArcSegment.subtractAngles(segmentDirection, channelDirection);
                     // if segmentDirection is more than 30 degrees away from channel direction, rotate the opposite way;
@@ -216,7 +217,7 @@ public class StsChannelGeometryPanel extends StsJPanel
                         else if (nextRotationAngle > limitRotateAngle)
                             arcAngle -= nextRotationAngle - limitRotateAngle;
                     }
-                    segment = new StsChannelArcSegment(segmentDirection, radius, arcAngle, lastPoint);
+                    segment = new StsChannelArcSegment(channel, segmentDirection, radius, arcAngle, lastPoint);
                     segmentDirection += arcAngle;
 
                     lastRotateCW = rotateCW;
@@ -224,8 +225,8 @@ public class StsChannelGeometryPanel extends StsJPanel
                 }
                 else
                 {
-                    float length = (float)channelLineLengthDistribBox.getSample();
-                    segment = new StsChannelLineSegment(lastPoint, segmentDirection, length);
+                    float length = (float) channelLineLengthDivWidthDistribBox.getSample();
+                    segment = new StsChannelLineSegment(channel, lastPoint, segmentDirection, length);
                     isArc = true;
                 }
                 lastPoint = segment.getLastPoint();

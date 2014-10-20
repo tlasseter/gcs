@@ -1,8 +1,6 @@
 package com.Sts.Framework.Actions.WizardComponents;
 
 import com.Sts.Framework.Interfaces.StsRandomDistribFace;
-import com.Sts.Framework.Interfaces.StsRandomGaussFace;
-import com.Sts.Framework.MVC.StsModel;
 import com.Sts.Framework.UI.Beans.StsComboBoxFieldBean;
 import com.Sts.Framework.UI.Beans.StsDoubleFieldBean;
 import com.Sts.Framework.UI.Beans.StsGroupBox;
@@ -43,11 +41,19 @@ public class StsRandomDistribGroupBox extends StsGroupBox implements StsRandomDi
         this.avg = avg;
         this.dev = dev;
         logAvg = Math.log(avg);
-        logDev = Math.log(avg + dev) - logAvg;
+        logDev = computeLogDev(avg, dev);
         this.count = -1;
         this.type = type;
         constructBeans();
         buildPanel();
+    }
+
+    private static double  computeLogDev(double avg, double dev)
+    {
+        if(dev <avg)
+            return Math.log(avg) - Math.log(avg - dev);
+        else
+            return Math.log(avg + dev) - Math.log(avg);
     }
 
     private void constructBeans()
@@ -119,6 +125,7 @@ public class StsRandomDistribGroupBox extends StsGroupBox implements StsRandomDi
     public void setAvg(double avg)
     {
         this.avg = avg;
+        logAvg = Math.log(avg);
     }
 
     @Override
@@ -130,6 +137,7 @@ public class StsRandomDistribGroupBox extends StsGroupBox implements StsRandomDi
     public void setDev(double dev)
     {
         this.dev = dev;
+        logDev = computeLogDev(avg, dev);
     }
 
     @Override
@@ -163,7 +171,7 @@ public class StsRandomDistribGroupBox extends StsGroupBox implements StsRandomDi
         Random random = new Random();
 
         double logAvg = Math.log(avg);
-        double logDev = Math.log(avg + dev) - logAvg;
+        double logDev = computeLogDev(avg, dev);
 
         for(int n = 0; n < nValues; n++)
         {

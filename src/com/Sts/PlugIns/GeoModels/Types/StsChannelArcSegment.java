@@ -1,10 +1,12 @@
 package com.Sts.PlugIns.GeoModels.Types;
 
+import com.Sts.Framework.MVC.Views.StsGLPanel3d;
 import com.Sts.Framework.Types.StsColor;
 import com.Sts.Framework.Types.StsPoint;
 import com.Sts.Framework.Utilities.StsException;
 import com.Sts.Framework.Utilities.StsGLDraw;
 import com.Sts.Framework.Utilities.StsMath;
+import com.Sts.PlugIns.GeoModels.DBTypes.StsChannel;
 
 import javax.media.opengl.GL;
 
@@ -15,16 +17,23 @@ import javax.media.opengl.GL;
  */
 public class StsChannelArcSegment extends StsChannelSegment
 {
+    /** circular arc radius */
     float radius;
+    /** circular arc sweep angle; positive is CCW */
     float arc;
+    /** the circular arc center point */
+    float[] centerPoint;
+    /** uniformly sampled straight line between first and last arc lines: base of point bar.
+     *  this will be gridded with innerRadius points to make point bar.  */
+    StsPoint[] basePoints = null;
 
     static final float dArc = 10;
 
     public StsChannelArcSegment() { }
 
-    public StsChannelArcSegment(float startDirection, float radius, float arc, StsPoint startPoint)
+    public StsChannelArcSegment(StsChannel channel, float startDirection, float radius, float arc, StsPoint startPoint)
     {
-        super(startDirection, startPoint);
+        super(channel, startDirection, startPoint);
         this.radius = radius;
         this.arc = arc;
         computePoints();
@@ -34,21 +43,24 @@ public class StsChannelArcSegment extends StsChannelSegment
     {
         try
         {
-            int nSegments = Math.max(5, StsMath.ceiling(Math.abs(arc) / dArc));
+            // divide the arc into intervals and compute points on inner, outer, and center arcs
+            int nIntervals = Math.max(5, StsMath.ceiling(Math.abs(arc) / dArc));
 
-            points = new StsPoint[nSegments + 1];
-            points[0] = startPoint;
+            centerLinePoints = new StsPoint[nIntervals + 1];
+            innerPoints = new StsPoint[nIntervals + 1];
+            outerPoints = new StsPoint[nIntervals + 1];
+            basePoints =  new StsPoint[nIntervals + 1];
 
             float centerAngle, angle;
-            float ddArc = arc / nSegments;
+            float ddArc = arc / nIntervals;
             if (arc < 0)
             {
                 centerAngle = startDirection;
-                angle = startDirection + 180;
+                angle = startDirection + refDirection + 90;
             }
             else
             {
-                centerAngle = startDirection + 180;
+                centerAngle = startDirection + refDirection + 90;
                 angle = startDirection;
             }
 
@@ -57,18 +69,39 @@ public class StsChannelArcSegment extends StsChannelSegment
             float xc = (float) (x0 + radius * StsMath.cosd(centerAngle));
             float yc = (float) (y0 + radius * StsMath.sind(centerAngle));
             float z = startPoint.getZ();
-            for (int n = 1; n < nSegments+1; n++)
+            centerPoint = new float[] { xc, yc, z };
+
+            float channelHalfWidth = channel.getChannelWidth()/2;
+            float innerRadius = radius - channelHalfWidth;
+            float outerRadius = radius + channelHalfWidth;
+
+            for (int n = 0; n < nIntervals+1; n++, angle += ddArc)
             {
-                angle += ddArc;
-                float x = (float) (xc + radius * StsMath.cosd(angle));
-                float y = (float) (yc + radius * StsMath.sind(angle));
-                points[n] = new StsPoint(x, y, z);
+                float x, y;
+
+                float cosa = (float)StsMath.cosd(angle);
+                float sina = (float)StsMath.sind(angle);
+                x = xc + radius * cosa;
+                y = yc + radius * sina;
+                centerLinePoints[n] = new StsPoint(x, y, z);
+                x = xc + innerRadius * cosa;
+                y = yc + innerRadius * sina;
+                innerPoints[n] = new StsPoint(x, y, z);
+                x = xc + outerRadius * cosa;
+                y = yc + outerRadius * sina;
+                outerPoints[n] = new StsPoint(x, y, z);
             }
+            StsPoint endPoint = innerPoints[nIntervals];
+            StsPoint dPoint = endPoint.subtract(startPoint);
+            dPoint.divide(nIntervals);
+            basePoints[0] = startPoint;
+            for (int n = 0; n < nIntervals; n++)
+                basePoints[n+1] = StsPoint.addPointsStatic(basePoints[n], dPoint);
             return true;
         }
         catch(Exception e)
         {
-            StsException.outputWarningException(this, "computePoints", e);
+            StsException.outputWarningException(this, "computeArcPoints", e);
             return false;
         }
     }
@@ -122,12 +155,23 @@ public class StsChannelArcSegment extends StsChannelSegment
         return angle >= refAngle;
     }
 
-    public void display(GL gl, boolean displayCenterLinePoints)
+    public void display(StsGLPanel3d glPanel3d, boolean displayCenterLinePoints, boolean drawFilled, StsColor stsColor)
     {
-        if (gl == null || points == null) return;
-        StsGLDraw.drawLine(gl, StsColor.RED, true, points);
-        if(displayCenterLinePoints)
-            StsGLDraw.drawPoint(gl, points[0].v, StsColor.RED, 6);
+        GL gl = glPanel3d.getGL();
+
+        if (gl == null || centerLinePoints == null) return;
+
+        StsGLDraw.drawLine(gl, stsColor, true, centerLinePoints);
+        if (displayCenterLinePoints)
+        {
+            glPanel3d.setViewShift(gl, 1.0f);
+            StsGLDraw.drawPoint(gl, centerLinePoints[0].v, StsColor.WHITE, 6);
+            glPanel3d.resetViewShift(gl);
+        }
+        if(!drawFilled) return;
+        // draw filled channels and point-bars
+        StsGLDraw.drawTwoLineStrip(gl, innerPoints, outerPoints, innerPoints.length);
+        StsGLDraw.drawTwoLineStippledStrip(gl, basePoints, innerPoints, innerPoints.length);
     }
 
     public void fillSerializableArrays(int index, byte[] segmentTypes, StsPoint[] startPoints, float[] startDirections, float[] sizes, float[] arcs)
@@ -141,6 +185,6 @@ public class StsChannelArcSegment extends StsChannelSegment
 
     public StsPoint getLastPoint()
     {
-        return StsPoint.getLastPoint(points);
+        return StsPoint.getLastPoint(centerLinePoints);
     }
 }

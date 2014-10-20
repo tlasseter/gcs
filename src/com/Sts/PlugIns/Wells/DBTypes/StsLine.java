@@ -1800,7 +1800,7 @@ public class StsLine extends StsLineVectorSetObject implements StsTreeObjectI, S
      float z;
      StsPoint point;
 
-           computePoints();
+           computeArcPoints();
      StsProject project = currentModel.getProject();
      z = project.getZMin();
      point = getPointAtZ(z, true);
@@ -1808,7 +1808,7 @@ public class StsLine extends StsLineVectorSetObject implements StsTreeObjectI, S
      z = project.getZMax();
      point = getPointAtZ(z, true);
            addLinePoint(point, true);
-           computePoints();
+           computeArcPoints();
     }
     */
     public StsRotatedBoundingBox getRotatedBoundingBox()

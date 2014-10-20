@@ -1235,13 +1235,24 @@ public class StsPoint extends StsSerialize implements Cloneable, StsSerializable
 	}
 
 	/** subtract a point from the point */
-	public boolean subtract(StsPoint otherPoint)
+	public boolean subtractInPlace(StsPoint otherPoint)
 	{
 		if(otherPoint == null) return false;
 		if(otherPoint.v.length != v.length) return false;
 		for(int i = 0; i < getLength(); i++) v[i] -= otherPoint.v[i];
 		return true;
 	}
+
+    /** subtract a point from the point */
+    public StsPoint subtract(StsPoint otherPoint)
+    {
+        if(otherPoint == null) return null;
+        if(otherPoint.v.length != v.length) return null;
+        int length = v.length;
+        StsPoint newPoint = new StsPoint(length);
+        for(int i = 0; i < length; i++) newPoint.v[i] = v[i] - otherPoint.v[i];
+        return newPoint;
+    }
 
     static public StsPoint getLastPoint(StsPoint[] points)
     {

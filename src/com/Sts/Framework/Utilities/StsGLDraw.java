@@ -27,10 +27,13 @@ public class StsGLDraw
     static final float nullValue = StsParameters.nullValue;
     static float DEG2RAD = 3.14159f / 180;
 
-	static public void initialize()
-	{
-		displayListSphere = 0;
+    public static final float[] verticalNormal = new float[] { 0.0f, 0.0f, 1.0f };
+    
+    static public void initialize()
+    {
+        displayListSphere = 0;
     }
+
     static public void drawFilledEllipse(float[] xyz, StsColor color, StsGLPanel glPanel, int xRadius, int yRadius, float orientation, double viewShift)
     {
         GL gl = glPanel.getGL();
@@ -57,12 +60,10 @@ public class StsGLDraw
                 float degInRad = i * DEG2RAD;
                 gl.glVertex3f((float) (Math.cos(degInRad) * xRadius), (float) (Math.sin(degInRad) * yRadius), 0.0f);
             }
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             StsException.outputException("StsGLDraw.drawPoint() failed.", e, StsException.WARNING);
-        }
-        finally
+        } finally
         {
             gl.glEnd();
             gl.glPopMatrix();
@@ -97,12 +98,10 @@ public class StsGLDraw
                 float degInRad = i * DEG2RAD;
                 gl.glVertex3f((float) (Math.cos(degInRad) * xRadius), (float) (Math.sin(degInRad) * yRadius), 0.0f);
             }
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             StsException.outputException("StsGLDraw.drawPoint() failed.", e, StsException.WARNING);
-        }
-        finally
+        } finally
         {
             gl.glEnd();
             gl.glPopMatrix();
@@ -128,12 +127,10 @@ public class StsGLDraw
             gl.glBegin(GL.GL_LINE_STRIP);
             for (int n = 0; n < points.length; n++)
                 gl.glVertex3fv(points[n].v, 0);
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             StsException.outputException("StsGLDraw.drawLineStrip() failed.", e, StsException.WARNING);
-        }
-        finally
+        } finally
         {
             gl.glEnd();
             gl.glEnable(GL.GL_LIGHTING);
@@ -172,44 +169,40 @@ public class StsGLDraw
             gl.glBegin(GL.GL_LINE_STRIP);
             for (int n = 0; n < points.length; n++)
                 gl.glVertex3fv(points[n], 0);
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             StsException.outputException("StsGLDraw.drawLineStrip() failed.", e, StsException.WARNING);
-        }
-        finally
+        } finally
         {
             gl.glEnd();
             gl.glEnable(GL.GL_LIGHTING);
-			if (width != -1) gl.glLineWidth(1);
+            if (width != -1) gl.glLineWidth(1);
         }
     }
 
-	public static void drawLineStrip(GL gl, StsColor color, float[][] xyzFloats, int min, int max)
-	{
-		if (gl == null || color == null || xyzFloats == null) return;
-		int nPoints = xyzFloats[0].length;
-		if (nPoints < 2) return;
-		try
-		{
-			/** IMPORTANT: turn LIGHTING off and then back on for lines */
-			gl.glDisable(GL.GL_LIGHTING);
-			color.setGLColor(gl);
-			gl.glBegin(GL.GL_LINE_STRIP);
+    public static void drawLineStrip(GL gl, StsColor color, float[][] xyzFloats, int min, int max)
+    {
+        if (gl == null || color == null || xyzFloats == null) return;
+        int nPoints = xyzFloats[0].length;
+        if (nPoints < 2) return;
+        try
+        {
+            /** IMPORTANT: turn LIGHTING off and then back on for lines */
+            gl.glDisable(GL.GL_LIGHTING);
+            color.setGLColor(gl);
+            gl.glBegin(GL.GL_LINE_STRIP);
 
-			for (int n = min; n <= max; n++)
-				gl.glVertex3f(xyzFloats[0][n], xyzFloats[1][n], xyzFloats[2][n]);
-		}
-		catch (Exception e)
-		{
-			StsException.outputException("StsGLDraw.drawLineStrip() failed.", e, StsException.WARNING);
-		}
-		finally
-		{
-			gl.glEnd();
-			gl.glEnable(GL.GL_LIGHTING);
-		}
-	}
+            for (int n = min; n <= max; n++)
+                gl.glVertex3f(xyzFloats[0][n], xyzFloats[1][n], xyzFloats[2][n]);
+        } catch (Exception e)
+        {
+            StsException.outputException("StsGLDraw.drawLineStrip() failed.", e, StsException.WARNING);
+        } finally
+        {
+            gl.glEnd();
+            gl.glEnable(GL.GL_LIGHTING);
+        }
+    }
 
     public static void drawLineStrip(GL gl, StsColor color, float[][] xyzVectors, float minIndexF, float maxIndexF)
     {
@@ -222,28 +215,26 @@ public class StsGLDraw
             color.setGLColor(gl);
             gl.glBegin(GL.GL_LINE_STRIP);
 
-			minIndexF = StsMath.minMax(minIndexF, 0, nPoints-1);
-			maxIndexF = StsMath.minMax(maxIndexF, 0, nPoints-1);
+            minIndexF = StsMath.minMax(minIndexF, 0, nPoints - 1);
+            maxIndexF = StsMath.minMax(maxIndexF, 0, nPoints - 1);
             int min = StsMath.ceiling(minIndexF);
             int max = StsMath.floor(maxIndexF);
-            if(minIndexF < min)
+            if (minIndexF < min)
             {
                 float[] xyz = StsTimeVectorSet.computeInterpolatedFloatsStatic(xyzVectors, minIndexF);
                 gl.glVertex3fv(xyz, 0);
             }
             for (int n = min; n <= max; n++)
                 gl.glVertex3f(xyzVectors[0][n], xyzVectors[1][n], xyzVectors[2][n]);
-            if(maxIndexF > max)
+            if (maxIndexF > max)
             {
                 float[] xyz = StsTimeVectorSet.computeInterpolatedFloatsStatic(xyzVectors, minIndexF);
                 gl.glVertex3fv(xyz, 0);
             }
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             StsException.outputException("StsGLDraw.drawLineStrip() failed.", e, StsException.WARNING);
-        }
-        finally
+        } finally
         {
             gl.glEnd();
             gl.glEnable(GL.GL_LIGHTING);
@@ -252,7 +243,7 @@ public class StsGLDraw
 
     public static void drawDottedLineStrip(GL gl, StsColor color, float[][] xyzVectors, float minIndexF, float maxIndexF)
     {
-		if(xyzVectors == null || xyzVectors[0] == null) return;
+        if (xyzVectors == null || xyzVectors[0] == null) return;
         try
         {
             gl.glDisable(GL.GL_LIGHTING);
@@ -264,12 +255,10 @@ public class StsGLDraw
             color = StsColor.BLACK;
             gl.glLineStipple(1, StsGraphicParameters.altDottedLine);
             drawLineStrip(gl, color, xyzVectors, minIndexF, maxIndexF);
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             StsException.outputException("StsGLDraw.drawLineStrip() failed.", e, StsException.WARNING);
-        }
-        finally
+        } finally
         {
             gl.glDisable(GL.GL_LINE_STIPPLE);
             gl.glEnable(GL.GL_LIGHTING);
@@ -293,12 +282,10 @@ public class StsGLDraw
             for (int n = minIndex; n <= maxIndex; n++)
                 gl.glVertex3f(xyzVectors[0][n], xyzVectors[1][n], xyzVectors[2][n]);
             gl.glVertex3fv(maxXyz, 0);
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             StsException.outputException("StsGLDraw.drawLineStrip() failed.", e, StsException.WARNING);
-        }
-        finally
+        } finally
         {
             gl.glEnd();
             gl.glEnable(GL.GL_LIGHTING);
@@ -318,12 +305,10 @@ public class StsGLDraw
             color = StsColor.BLACK;
             gl.glLineStipple(1, StsGraphicParameters.altDottedLine);
             drawLineStrip(gl, color, xyzVectors, minXyz, maxXyz, minIndex, maxIndex);
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             StsException.outputException("StsGLDraw.drawLineStrip() failed.", e, StsException.WARNING);
-        }
-        finally
+        } finally
         {
             gl.glDisable(GL.GL_LINE_STIPPLE);
             gl.glEnable(GL.GL_LIGHTING);
@@ -349,12 +334,10 @@ public class StsGLDraw
             gl.glBegin(GL.GL_LINE_STRIP);
             for (int n = 0; n < points.length; n++)
                 gl.glVertex3dv(points[n], 0);
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             StsException.outputException("StsGLDraw.drawLineStrip() failed.", e, StsException.WARNING);
-        }
-        finally
+        } finally
         {
             gl.glEnd();
             gl.glEnable(GL.GL_LIGHTING);
@@ -379,24 +362,22 @@ public class StsGLDraw
                 float[] v = points[n].v;
                 gl.glVertex3f(v[0], v[1], v[zIndex]);
             }
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             StsException.outputException("StsGLDraw.drawLineStrip() failed.", e, StsException.WARNING);
-        }
-        finally
+        } finally
         {
             gl.glEnd();
             gl.glEnable(GL.GL_LIGHTING);
         }
     }
 
-	public static void drawLineStrip(GL gl, StsColor color, StsPoint[] points, int min, int max, StsPoint topPoint, StsPoint botPoint, int zIndex, int width)
+    public static void drawLineStrip(GL gl, StsColor color, StsPoint[] points, int min, int max, StsPoint topPoint, StsPoint botPoint, int zIndex, int width)
     {
-		if (width != -1) gl.glLineWidth(width);
-		drawLineStrip(gl, color, points, min, max, topPoint, botPoint, zIndex);
-		if (width != -1) gl.glLineWidth(1);
-	}
+        if (width != -1) gl.glLineWidth(width);
+        drawLineStrip(gl, color, points, min, max, topPoint, botPoint, zIndex);
+        if (width != -1) gl.glLineWidth(1);
+    }
 
     public static void drawLineStrip(GL gl, StsColor color, StsPoint[] points, int min, int max, StsPoint topPoint, StsPoint botPoint, int zIndex)
     {
@@ -426,17 +407,16 @@ public class StsGLDraw
                 float[] v = botPoint.v;
                 gl.glVertex3f(v[0], v[1], v[zIndex]);
             }
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             StsException.outputException("StsGLDraw.drawLineStrip() failed.", e, StsException.WARNING);
-        }
-        finally
+        } finally
         {
             gl.glEnd();
             gl.glEnable(GL.GL_LIGHTING);
         }
     }
+
     private static void drawLineStrip(GL gl, StsColor color, StsPoint[] points, int min, int max, int zIndex)
     {
         if (gl == null || color == null || points == null) return;
@@ -456,12 +436,10 @@ public class StsGLDraw
                 float[] v = points[n].v;
                 gl.glVertex3f(v[0], v[1], v[zIndex]);
             }
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             StsException.outputException("StsGLDraw.drawLineStrip() failed.", e, StsException.WARNING);
-        }
-        finally
+        } finally
         {
             gl.glEnd();
             gl.glEnable(GL.GL_LIGHTING);
@@ -516,12 +494,10 @@ public class StsGLDraw
                         gl.glVertex2f(points[n].v[0], points[n].v[1]);
             }
 
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             StsException.outputException("StsGLDraw.drawLineStrip2d() failed.", e, StsException.WARNING);
-        }
-        finally
+        } finally
         {
             gl.glEnd();
             gl.glEnable(GL.GL_LIGHTING);
@@ -530,9 +506,9 @@ public class StsGLDraw
 
     static public void drawLineStrip2d(GL gl, StsColor color, float[][] lineVectorFloats, int min, int max, int nXAxis2d, int nYAxis2d)
     {
-       if (gl == null || color == null || lineVectorFloats == null) return;
-       float[] xAxisVector = lineVectorFloats[nXAxis2d];
-       float[] yAxisVector = lineVectorFloats[nYAxis2d];
+        if (gl == null || color == null || lineVectorFloats == null) return;
+        float[] xAxisVector = lineVectorFloats[nXAxis2d];
+        float[] yAxisVector = lineVectorFloats[nYAxis2d];
         try
         {
             if (max - min < 1) return;
@@ -543,12 +519,10 @@ public class StsGLDraw
 
             for (int n = min; n <= max; n++)
                 gl.glVertex2f(xAxisVector[n], yAxisVector[n]);
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             StsException.outputException("StsGLDraw.drawLineStrip2d() failed.", e, StsException.WARNING);
-        }
-        finally
+        } finally
         {
             gl.glEnd();
             gl.glEnable(GL.GL_LIGHTING);
@@ -572,12 +546,10 @@ public class StsGLDraw
             float z = zMin;
             for (int n = 0; n < nValues; n++, z += zInc)
                 gl.glVertex2f(x[n] + multiplier * adjustments[n], z);
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             StsException.outputException("StsGLDraw.drawLineStrip2d() failed.", e, StsException.WARNING);
-        }
-        finally
+        } finally
         {
             gl.glEnd();
             gl.glEnable(GL.GL_LIGHTING);
@@ -601,12 +573,10 @@ public class StsGLDraw
             gl.glLineStipple(1, StsGraphicParameters.altDottedLine);
 
             drawLineStrip(gl, color, points, width);
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             StsException.outputException("StsGLDraw.drawLineStrip() failed.", e, StsException.WARNING);
-        }
-        finally
+        } finally
         {
             gl.glDisable(GL.GL_LINE_STIPPLE);
             gl.glEnable(GL.GL_LIGHTING);
@@ -641,8 +611,7 @@ public class StsGLDraw
             drawLineStrip2d(gl, color, x, adjustments, multiplier, zMin, zInc);
 
             gl.glDisable(GL.GL_LINE_STIPPLE);
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             StsException.outputException("StsGLDraw.drawLineStrip2d() failed.", e, StsException.WARNING);
         }
@@ -663,12 +632,10 @@ public class StsGLDraw
 
             gl.glLineStipple(1, StsGraphicParameters.altDottedLine);
             drawLineStrip2d(gl, StsColor.BLACK, points, nCoor);
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             StsException.outputException("StsGLDraw.drawLineStrip2d() failed.", e, StsException.WARNING);
-        }
-        finally
+        } finally
         {
             gl.glDisable(GL.GL_LINE_STIPPLE);
         }
@@ -698,12 +665,10 @@ public class StsGLDraw
 
                 gl.glPopName();
             }
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             StsException.outputException("StsGLDraw.pickLineStrip() failed.", e, StsException.WARNING);
-        }
-        finally
+        } finally
         {
             //            gl.glEnable(GL.GL_LIGHTING);
         }
@@ -738,8 +703,7 @@ public class StsGLDraw
                         gl.glVertex3f(v0[0], v0[1], v0[zIndex]);
                         gl.glVertex3f(v1[0], v1[1], v1[zIndex]);
                         gl.glEnd();
-                    }
-                    else
+                    } else
                     {
                         gl.glEnd();
                         System.out.println("Pickline error: vertex index " + n + " is only " + v0.length);
@@ -748,18 +712,15 @@ public class StsGLDraw
                     }
                     gl.glPopName();
                 }
-            }
-            else
+            } else
             {
                 System.out.println("Pickline error: vertex index out of range " + zIndex);
             }
 
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             StsException.outputException("StsGLDraw.pickLineStrip() failed.", e, StsException.WARNING);
-        }
-        finally
+        } finally
         {
             //            gl.glEnable(GL.GL_LIGHTING);
         }
@@ -796,20 +757,19 @@ public class StsGLDraw
                 gl.glPushName(n);
                 gl.glBegin(GL.GL_LINE_STRIP);
                 gl.glVertex3f(x[n], y[n], z[n]);
-                gl.glVertex3f(x[n+1], y[n+1], z[n+1]);
+                gl.glVertex3f(x[n + 1], y[n + 1], z[n + 1]);
                 gl.glEnd();
                 gl.glPopName();
             }
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             StsException.outputWarningException(StsGLDraw.class, "pickLineStrip", e);
         }
     }
 
-   public static void drawLine(GL gl, StsColor color, boolean highlighted, float[][] lineVectorFloats, float minIndexF, float maxIndexF)
+    public static void drawLine(GL gl, StsColor color, boolean highlighted, float[][] lineVectorFloats, float minIndexF, float maxIndexF)
     {
-		if(lineVectorFloats == null || lineVectorFloats[0] == null) return;
+        if (lineVectorFloats == null || lineVectorFloats[0] == null) return;
         if (highlighted)
             gl.glLineWidth(StsGraphicParameters.edgeLineWidthHighlighted);
         else
@@ -843,8 +803,7 @@ public class StsGLDraw
         {
             gl.glLineWidth(StsGraphicParameters.well3dLineWidthHighlighted);
             //StsGLDraw.drawHighlightedLine(gl, color, highlighted, points, min, max, topPoint, botPoint, zIndex);
-        }
-        else
+        } else
             gl.glLineWidth(StsGraphicParameters.well3dLineWidth);
 
         drawLineStrip(gl, color, points, min, max, topPoint, botPoint, zIndex);
@@ -939,7 +898,7 @@ public class StsGLDraw
 
     public static void drawDottedLine(GL gl, StsColor color, boolean highlighted, float[][] xyzVectors, int min, int max, float topIndexF, float botIndexF, int zIndex)
     {
-		if(xyzVectors == null || xyzVectors[0] == null) return;
+        if (xyzVectors == null || xyzVectors[0] == null) return;
         if (highlighted)
             gl.glLineWidth(StsGraphicParameters.edgeLineWidthHighlighted);
         else
@@ -1010,7 +969,7 @@ public class StsGLDraw
 
     public static void drawDottedLine(GL gl, StsColor color, boolean highlighted, float[][] lineVectorFloats, float minIndexF, float maxIndexF)
     {
-		if(lineVectorFloats == null || lineVectorFloats[0] == null) return;
+        if (lineVectorFloats == null || lineVectorFloats[0] == null) return;
         if (highlighted)
             gl.glLineWidth(StsGraphicParameters.edgeLineWidthHighlighted);
         else
@@ -1078,30 +1037,30 @@ public class StsGLDraw
     }
 
     public static void drawDottedLine(GL gl, StsColor color, boolean highlighted, StsPoint[] points, int min, int max, StsPoint topPoint, StsPoint botPoint, int zIndex)
-     {
-         float edgeWidth;
-         if (highlighted)
-             edgeWidth = StsGraphicParameters.edgeLineWidthHighlighted;
-         else
-             edgeWidth = StsGraphicParameters.edgeLineWidth;
+    {
+        float edgeWidth;
+        if (highlighted)
+            edgeWidth = StsGraphicParameters.edgeLineWidthHighlighted;
+        else
+            edgeWidth = StsGraphicParameters.edgeLineWidth;
 
-         gl.glLineWidth(edgeWidth);
+        gl.glLineWidth(edgeWidth);
 
-         gl.glLineStipple(1, StsGraphicParameters.dottedLine);
-         gl.glEnable(GL.GL_LINE_STIPPLE);
-         drawLineStrip(gl, color, points, min, max, topPoint, botPoint, zIndex);
+        gl.glLineStipple(1, StsGraphicParameters.dottedLine);
+        gl.glEnable(GL.GL_LINE_STIPPLE);
+        drawLineStrip(gl, color, points, min, max, topPoint, botPoint, zIndex);
 
-         color = StsColor.BLACK;
-         gl.glLineStipple(1, StsGraphicParameters.altDottedLine);
-         gl.glEnable(GL.GL_LINE_STIPPLE);
-         drawLineStrip(gl, color, points, min, max, topPoint, botPoint, zIndex);
+        color = StsColor.BLACK;
+        gl.glLineStipple(1, StsGraphicParameters.altDottedLine);
+        gl.glEnable(GL.GL_LINE_STIPPLE);
+        drawLineStrip(gl, color, points, min, max, topPoint, botPoint, zIndex);
 
-         gl.glDisable(GL.GL_LINE_STIPPLE);
-     }
+        gl.glDisable(GL.GL_LINE_STIPPLE);
+    }
 
     static public void drawDottedLineStrip2d(GL gl, StsColor color, StsColor backgroundColor, float[][] lineVectorFloats, int min, int max, int nXAxis2d, int nYAxis2d)
     {
-       if (gl == null || color == null || lineVectorFloats == null) return;
+        if (gl == null || color == null || lineVectorFloats == null) return;
 
         try
         {
@@ -1116,15 +1075,13 @@ public class StsGLDraw
             gl.glEnable(GL.GL_LINE_STIPPLE);
             drawLineStrip2d(gl, backgroundColor, lineVectorFloats, min, max, nXAxis2d, nYAxis2d);
 
-        gl.glDisable(GL.GL_LINE_STIPPLE);
-        gl.glEnable(GL.GL_LIGHTING);
+            gl.glDisable(GL.GL_LINE_STIPPLE);
+            gl.glEnable(GL.GL_LIGHTING);
 
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             StsException.outputException("StsGLDraw.drawLineStrip2d() failed.", e, StsException.WARNING);
-        }
-        finally
+        } finally
         {
             gl.glEnd();
             gl.glEnable(GL.GL_LIGHTING);
@@ -1139,11 +1096,11 @@ public class StsGLDraw
         gl.glLineWidth(edgeWidth);
 
         float[] xy0 = new float[]
-            {
-                point0.v[coorIndexes[0]], point0.v[coorIndexes[1]]};
+                {
+                        point0.v[coorIndexes[0]], point0.v[coorIndexes[1]]};
         float[] xy1 = new float[]
-            {
-                point1.v[coorIndexes[0]], point1.v[coorIndexes[1]]};
+                {
+                        point1.v[coorIndexes[0]], point1.v[coorIndexes[1]]};
 
         //        StsGLDraw.drawPoint2d(xy0, color, gl, 10);
         //        StsGLDraw.drawPoint2d(xy1, color, gl, 10);
@@ -1212,16 +1169,14 @@ public class StsGLDraw
         try
         {
             color.setGLColor(gl);
-            
+
             gl.glBegin(GL.GL_LINE_STRIP);
             gl.glVertex2fv(xy0, 0);
             gl.glVertex2fv(xy1, 0);
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             StsException.outputException("StsGLDraw.drawLine2d() failed.", e, StsException.WARNING);
-        }
-        finally
+        } finally
         {
             gl.glEnd();
         }
@@ -1280,19 +1235,19 @@ public class StsGLDraw
                     gl.glVertex3fv(points[i][j].v, 0);
                 gl.glEnd();
             }
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             StsException.outputException("StsGLDraw.drawGridLines() failed.", e, StsException.WARNING);
-        }
-        finally
+        } finally
         {
             gl.glEnd();
             gl.glEnable(GL.GL_LIGHTING);
         }
     }
 
-    /** draw first and last rows and cols, but skip some of the inner rows and cols */
+    /**
+     * draw first and last rows and cols, but skip some of the inner rows and cols
+     */
     public static void drawGridLines(GL gl, StsColor color, float lineWidth,
                                      StsPoint[][] points, int nRows, int nCols, int rowStride, int colStride)
     {
@@ -1342,8 +1297,7 @@ public class StsGLDraw
             gl.glBegin(GL.GL_LINE_STRIP);
             for (i = 0; i < nRows; i++)
                 gl.glVertex3fv(points[i][nCols - 1].v, 0);
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             gl.glEnd();
             gl.glEnable(GL.GL_LIGHTING);
@@ -1352,22 +1306,22 @@ public class StsGLDraw
 
     static public void drawXYArc(GL gl, StsColor color, boolean highlighted, float x0, float y0, float z, float r, float dir, float arc, float dArc)
     {
-        int nSegments = Math.min(5, StsMath.ceiling(arc/dArc));
-        dArc = arc/nSegments;
+        int nSegments = Math.min(5, StsMath.ceiling(arc / dArc));
+        dArc = arc / nSegments;
 
-        StsPoint[] points = new StsPoint[nSegments+1];
+        StsPoint[] points = new StsPoint[nSegments + 1];
         points[0] = new StsPoint(x0, y0, z);
 
-        float xc = (float)(x0 + r*StsMath.cosd(dir));
-        float yc = (float)(y0 + r*StsMath.sind(dir));
+        float xc = (float) (x0 + r * StsMath.cosd(dir));
+        float yc = (float) (y0 + r * StsMath.sind(dir));
 
         float a;
-        if(arc > 0)
-            a =  dir - 90 + dArc;
+        if (arc > 0)
+            a = dir - 90 + dArc;
         else
-            a =  dir - 90 + dArc;
+            a = dir - 90 + dArc;
 
-        for(int n = 1; n < nSegments; n++, a += dArc)
+        for (int n = 1; n < nSegments; n++, a += dArc)
         {
             float x = xc + (float) StsMath.cosd(a);
             float y = yc + (float) StsMath.sind(a);
@@ -1423,12 +1377,10 @@ public class StsGLDraw
             gl.glBegin(GL.GL_LINE_STRIP);
             gl.glVertex3fv(topPoint.v, 0);
             gl.glVertex3fv(botPoint.v, 0);
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             StsException.outputException("StsGLDraw.drawPoint() failed.", e, StsException.WARNING);
-        }
-        finally
+        } finally
         {
             gl.glEnd();
             gl.glEnable(GL.GL_LIGHTING);
@@ -1567,12 +1519,10 @@ public class StsGLDraw
             gl.glBegin(GL.GL_LINE_STRIP);
             gl.glVertex3fv(topPoint.v, 0);
             gl.glVertex3fv(botPoint.v, 0);
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             StsException.outputException("StsGLDraw.drawPoint() failed.", e, StsException.WARNING);
-        }
-        finally
+        } finally
         {
             gl.glEnd();
             gl.glEnable(GL.GL_LIGHTING);
@@ -1619,12 +1569,10 @@ public class StsGLDraw
             gl.glBegin(GL.GL_LINE_STRIP);
             gl.glVertex3fv(topPoint.v, 0);
             gl.glVertex3fv(botPoint.v, 0);
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             StsException.outputException("StsGLDraw.drawPoint() failed.", e, StsException.WARNING);
-        }
-        finally
+        } finally
         {
             gl.glEnd();
             gl.glEnable(GL.GL_LIGHTING);
@@ -1646,7 +1594,7 @@ public class StsGLDraw
             gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
             gl.glShadeModel(GL.GL_FLAT);
             // gl.glShadeModel(gl.GL_SMOOTH);
-            if(color != null) color.setGLColor(gl);
+            if (color != null) color.setGLColor(gl);
             GLUquadric qobj = glu.gluNewQuadric();
 
             gl.glPushMatrix();
@@ -1664,12 +1612,10 @@ public class StsGLDraw
 
             gl.glPopMatrix();
 
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             StsException.outputException("StsGLDraw.drawPoint() failed.", e, StsException.WARNING);
-        }
-        finally
+        } finally
         {
             gl.glEnd();
             gl.glEnable(GL.GL_LIGHTING);
@@ -1734,18 +1680,17 @@ public class StsGLDraw
             gl.glPopMatrix();
             //gl.glPopMatrix();
 
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             StsException.outputException("StsGLDraw.drawPoint() failed.", e, StsException.WARNING);
-        }
-        finally
+        } finally
         {
             gl.glEnd();
             gl.glEnable(GL.GL_LIGHTING);
             gl.glFlush();
         }
     }
+
     static public void drawSphere(StsGLPanel3d glPanel3d, float[] xyz, StsColor color, float size)
     {
         if (xyz == null) return;
@@ -1759,13 +1704,12 @@ public class StsGLDraw
             gl.glPushMatrix();
             gl.glTranslatef(xyz[0], xyz[1], xyz[2]);
             float zscale = glPanel3d.getZScale();
-            float scaleFactor = size/sphereSize;
+            float scaleFactor = size / sphereSize;
             gl.glScalef(scaleFactor, scaleFactor, scaleFactor / zscale);
             color.setGLColor(gl);
             if (displayListSphere == 0 && !constructSphereDisplayList(glPanel3d, sphereSize)) return;
             gl.glCallList(displayListSphere);
-        }
-        finally
+        } finally
         {
             gl.glFlush();
             gl.glPopMatrix();
@@ -1786,24 +1730,24 @@ public class StsGLDraw
             gl.glTranslatef(xyz[0], xyz[1], xyz[2]);
             gl.glRotatef(azimuth, 1.0f, 0.0f, 1.0f);
             float zscale = glPanel3d.getZScale();
-            float scaleFactor = size/sphereSize;
-            gl.glScalef(0.8f*scaleFactor, 0.1f*scaleFactor, 0.1f*scaleFactor / zscale);
+            float scaleFactor = size / sphereSize;
+            gl.glScalef(0.8f * scaleFactor, 0.1f * scaleFactor, 0.1f * scaleFactor / zscale);
             color.setGLColor(gl);
             if (displayListSphere == 0 && !constructSphereDisplayList(glPanel3d, sphereSize)) return;
             gl.glCallList(displayListSphere);
-        }
-        finally
+        } finally
         {
             gl.glFlush();
             gl.glPopMatrix();
         }
     }
+
     static public void drawDisk2d(StsGLPanel3d glPanel3d, float[] xy, StsColor color, float size)
     {
         GL gl = glPanel3d.getGL();
         gl.glDisable(GL.GL_LIGHTING);
-        float[] xyz = new float[] { xy[0], xy[1], 0.0f };
-        drawDisk3d(glPanel3d, xyz, StsColor.BLACK, size+2, 0.0f, 0.0f, false);
+        float[] xyz = new float[]{xy[0], xy[1], 0.0f};
+        drawDisk3d(glPanel3d, xyz, StsColor.BLACK, size + 2, 0.0f, 0.0f, false);
         drawDisk3d(glPanel3d, xyz, color, size, 0.0f, 0.0f, true);
         gl.glEnable(GL.GL_LIGHTING);
     }
@@ -1812,6 +1756,7 @@ public class StsGLDraw
     {
         drawDisk3d(glPanel3d, xyz, color, size, 0.0f, 0.0f, true);
     }
+
     static public void drawDisk3d(StsGLPanel3d glPanel3d, float[] xyz, StsColor color, float size, float azimuth, float elevation, boolean filled)
     {
         if (xyz == null) return;
@@ -1832,22 +1777,82 @@ public class StsGLDraw
             gl.glScalef(1.0f, 1.0f, 1.0f);
 
             gl.glLineWidth(1.0f);
-            if(filled)
+            if (filled)
                 glu.gluQuadricDrawStyle(qobj, GLU.GLU_FILL);
             else
                 glu.gluQuadricDrawStyle(qobj, GLU.GLU_LINE);
             glu.gluQuadricNormals(qobj, GLU.GLU_SMOOTH);
             glu.gluDisk(qobj, 0, size, 32, 8);
             gl.glPopMatrix();
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             StsException.outputException("StsGLDraw.drawSphere() failed.", e, StsException.WARNING);
-        }
-        finally
+        } finally
         {
             gl.glFlush();
         }
+    }
+
+    /**
+     * gluPartialDisk renders a partial disk on the z = 0 plane. A partial disk is similar to a full disk,
+     * except that only the subset of the disk from startAngle through startAngle + sweepAngle is included
+     * (where 0 degrees is along the +yaxis, 90 degrees along the +x axis, 180 along the -y axis, and 270 along the -x axis).
+     * The partial disk has a radius of outerRadius, and contains a concentric circular hole with a radius of innerRadius.
+     * If innerRadius is zero, then no hole is generated. The partial disk is subdivided around the z axis into slices
+     * (like pizza slices), and also about the z axis into rings (as specified by slices and loops, respectively).
+     * With respect to orientation, the +z side of the partial disk is considered to be outside (see "gluQuadricOrientation" ).
+     * This means that if the orientation is set to GLU_OUTSIDE, then any normals generated point along the +z axis.
+     * Otherwise, they point along the -z axis.
+     * <p>
+     * So we need to convert angles as our 0 degrees is +X and positive sweepAngle is CCW and angle ranges from -180 to +180.
+     * GLU assumes 0 degrees is +Y and positive sweepAngle is CW and angle ranges from 0 to 360.
+     * To convert our startAngle and sweepAngle:  if sweepAngle < 0, then startAngle += sweepAngle and reverse sweepAngle;
+     * then for the startAngle: first reverse sign and add 90. If sweepAngle > 0, then startAngle -= sweepAngle. If startAngle < 0, add 360.
+     */
+    static public void drawPartialDisk3d(StsGLPanel3d glPanel3d, float[] xyz, StsColor color, float innerRadius, float outerRadius, float startAngle, float sweepAngle, boolean filled)
+    {
+        if (xyz == null) return;
+        GL gl = glPanel3d.getGL();
+        GLU glu = glPanel3d.getGLU();
+        if ((gl == null) || (glu == null)) return;
+        try
+        {
+            color.setGLColor(gl);
+            gl.glShadeModel(gl.GL_SMOOTH);
+
+            GLUquadric qobj = glu.gluNewQuadric();
+
+            gl.glPushMatrix();
+            gl.glTranslatef(xyz[0], xyz[1], xyz[2]);
+            gl.glScalef(1.0f, 1.0f, 1.0f);
+
+            gl.glLineWidth(1.0f);
+            if (filled)
+                glu.gluQuadricDrawStyle(qobj, GLU.GLU_FILL);
+            else
+                glu.gluQuadricDrawStyle(qobj, GLU.GLU_LINE);
+            glu.gluQuadricNormals(qobj, GLU.GLU_SMOOTH);
+
+            // reverse sign of sweep angle because of change from our angle system to GLU
+            sweepAngle = -sweepAngle;
+            startAngle = convertToGluAngle(startAngle);
+
+            glu.gluPartialDisk(qobj, innerRadius, outerRadius, 32, 8, startAngle, sweepAngle);
+            gl.glPopMatrix();
+        } catch (Exception e)
+        {
+            StsException.outputException("StsGLDraw.drawPartialDisk() failed.", e, StsException.WARNING);
+        } finally
+        {
+            gl.glFlush();
+        }
+    }
+
+    static float convertToGluAngle(float angle)
+    {
+        angle=-angle+90;
+        if(angle<0) angle+=360;
+        return angle;
     }
 
     static public void displayTestBlobs(StsGLPanel3d glPanel3d)
@@ -1941,12 +1946,12 @@ public class StsGLDraw
         }
     }
 
-    static public void drawTriangle(float[] xyz, StsColor color, StsGLPanel glPanel, int size)
+    static public void drawTriangle(float[] xyz, StsColor color, StsGLPanel glPanel)
     {
-        drawTriangle(xyz, color, glPanel, size, 0);
+        drawTriangle(xyz, color, glPanel, 0);
     }
 
-    static public void drawTriangle(float[] xyz, StsColor color, StsGLPanel glPanel, int size, double viewShift)
+    static public void drawTriangle(float[] xyz, StsColor color, StsGLPanel glPanel, double viewShift)
     {
         GL gl = glPanel.getGL();
 
@@ -1960,7 +1965,6 @@ public class StsGLDraw
 
             color.setGLColor(gl);
 
-            gl.glPointSize((float) size);
             gl.glDisable(GL.GL_LIGHTING);
             gl.glBegin(GL.GL_POINTS);
             gl.glVertex3fv(xyz, 0);
@@ -1977,6 +1981,26 @@ public class StsGLDraw
         }
     }
 
+    static public void drawQuad(GL gl, float[] xyz00, float[] xyz01, float[] xyz11, float[] xyz10, StsColor color)
+    {
+        try
+        {
+            color.setGLColor(gl);
+            gl.glBegin(GL.GL_QUADS);
+            gl.glVertex3fv(xyz00, 0);
+            gl.glVertex3fv(xyz01, 0);
+            gl.glVertex3fv(xyz11, 0);
+            gl.glVertex3fv(xyz10, 0);
+        }
+        catch (Exception e)
+        {
+            StsException.outputException("StsGLDraw.drawPoint() failed.", e, StsException.WARNING);
+        }
+        finally
+        {
+            gl.glEnd();
+        }
+    }
     static public int getDisplayListSphere(StsGLPanel3d glPanel3d)
     {
         if(displayListSphere == 0) constructSphereDisplayList(glPanel3d, sphereSize);
@@ -2794,6 +2818,53 @@ public class StsGLDraw
         finally
         {
             gl.glEnd();
+        }
+    }
+
+    public static void drawTwoLineStrip(GL gl, StsPoint[] line0,  StsPoint[] line1, int nPoints)
+    {
+        try
+        {
+            gl.glBegin(GL.GL_QUAD_STRIP);
+            gl.glNormal3fv(verticalNormal, 0);
+            for(int n = 0; n < nPoints; n++)
+            {
+                gl.glVertex3fv(line0[n].v, 0);
+                gl.glVertex3fv(line1[n].v, 0);
+            }
+        }
+        catch (Exception e)
+        {
+            StsException.outputWarningException(StsGLDraw.class, "drawTwoLineStrip", e);
+        }
+        finally
+        {
+            gl.glEnd();
+        }
+    }
+
+    public static void drawTwoLineStippledStrip(GL gl, StsPoint[] line0,  StsPoint[] line1, int nPoints)
+    {
+        try
+        {
+            gl.glEnable(GL.GL_POLYGON_STIPPLE);
+            gl.glPolygonStipple(StsGraphicParameters.halftone, 0);
+            gl.glBegin(GL.GL_QUAD_STRIP);
+            gl.glNormal3fv(verticalNormal, 0);
+            for(int n = 0; n < nPoints; n++)
+            {
+                gl.glVertex3fv(line0[n].v, 0);
+                gl.glVertex3fv(line1[n].v, 0);
+            }
+        }
+        catch (Exception e)
+        {
+            StsException.outputWarningException(StsGLDraw.class, "drawTwoLineStrip", e);
+        }
+        finally
+        {
+            gl.glEnd();
+            gl.glDisable(GL.GL_POLYGON_STIPPLE);
         }
     }
 
