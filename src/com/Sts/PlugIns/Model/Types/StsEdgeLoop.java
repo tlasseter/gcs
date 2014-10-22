@@ -2024,8 +2024,8 @@ public class StsEdgeLoop
             gridRowMin = boundingBox.rowMin;
             gridColMin = boundingBox.colMin;
 
-            nRows = boundingBox.getNRows();
-            nCols = boundingBox.getNCols();
+            nRows = boundingBox.getNSubRows();
+            nCols = boundingBox.getNSubCols();
             if (nRows == 0 && nCols == 0)
             {
                 StsPolygon polygon = new StsPolygon(boundaryLinks, StsPolygon.GRID, grid);

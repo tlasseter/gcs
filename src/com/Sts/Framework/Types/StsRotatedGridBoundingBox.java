@@ -100,8 +100,9 @@ public class StsRotatedGridBoundingBox extends StsRotatedBoundingBox implements 
         initializeToBoundingBox(otherBox);
     }
 
-    public StsRotatedGridBoundingBox(int nRows, int nCols, double xOrigin, double yOrigin, float xMin, float yMin, float xInc, float yInc)
+    public StsRotatedGridBoundingBox(int nRows, int nCols, double xOrigin, double yOrigin, float xMin, float yMin, float xInc, float yInc, boolean persistent)
     {
+        super(persistent);
         this.nRows = nRows;
         this.nCols = nCols;
         this.xOrigin = xOrigin;
@@ -130,8 +131,15 @@ public class StsRotatedGridBoundingBox extends StsRotatedBoundingBox implements 
 
 	public void initialize(StsRotatedGridBoundingBox rotatedBoundingBox)
 	{
-		super.initialize(rotatedBoundingBox);
-		this.setXYZIncs(rotatedBoundingBox);
+        super.initialize(rotatedBoundingBox);
+        this.setXYZIncs(rotatedBoundingBox);
+
+        rowNumMin = rotatedBoundingBox.rowNumMin;
+        rowNumMax = rotatedBoundingBox.rowNumMax;
+        colNumMin = rotatedBoundingBox.colNumMin;
+        colNumMax = rotatedBoundingBox.colNumMax;
+        rowNumInc = rotatedBoundingBox.rowNumInc;
+        colNumInc = rotatedBoundingBox.colNumInc;
 	}
     public void initializeToBoundingBox(StsRotatedGridBoundingBox boundingBox)
     {
@@ -2428,9 +2436,18 @@ public class StsRotatedGridBoundingBox extends StsRotatedBoundingBox implements 
         }
     }
 
+    public StsRotatedGridBoundingBox createCenteredGrid()
+    {
+        float xMin = this.xMin + xInc/2;
+        float yMin = this.yMin + yInc/2;
+        int nRows = this.nRows - 1;
+        int nCols = this.nCols - 1;
+        return new StsRotatedGridBoundingBox(nRows, nCols, xOrigin, yOrigin, xMin, yMin, xInc, yInc, false);
+    }
+
     public static void main(String[] args)
     {
-        StsRotatedGridBoundingBox boundingBox = new StsRotatedGridBoundingBox(101, 51, 0.0, 0.0, 0.0f, 0.0f, 1.0f, 1.0f);
+        StsRotatedGridBoundingBox boundingBox = new StsRotatedGridBoundingBox(101, 51, 0.0, 0.0, 0.0f, 0.0f, 1.0f, 1.0f, false);
         Iterator iterator = boundingBox.getQuadCellIterator();
         while (iterator.hasNext())
         {

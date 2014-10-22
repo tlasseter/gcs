@@ -72,7 +72,7 @@ public class StsCropVolume extends StsRotatedGridBoundingSubBox implements StsTr
 
 	public void reInitialize(StsRotatedGridBoundingBox rotatedBoundingBox)
     {
-		super.initialize(rotatedBoundingBox);
+		super.initializeBoundingBoxAndSubBox(rotatedBoundingBox);
 		setMinMaxRanges();
 	}
 

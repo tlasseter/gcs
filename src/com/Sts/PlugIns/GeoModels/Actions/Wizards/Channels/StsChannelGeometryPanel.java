@@ -5,6 +5,7 @@ import com.Sts.Framework.Actions.Wizards.StsWizard;
 import com.Sts.Framework.DBTypes.StsObjectRefList;
 import com.Sts.Framework.Interfaces.StsRandomDistribFace;
 import com.Sts.Framework.Types.StsPoint;
+import com.Sts.Framework.Types.StsRotatedGridBoundingBox;
 import com.Sts.Framework.UI.Beans.StsButtonFieldBean;
 import com.Sts.Framework.UI.Beans.StsJPanel;
 import com.Sts.Framework.Utilities.StsMath;
@@ -35,6 +36,7 @@ public class StsChannelGeometryPanel extends StsJPanel
     private StsRandomDistribGroupBox channelArcRadiusDivWidthDistribBox, channelArcAngleDistribBox;
     private StsRandomDistribGroupBox channelLineLengthDivWidthDistribBox;
     private StsButtonFieldBean buildButton;
+    private StsButtonFieldBean buildGridButton;
 
     static float channelArcRadiusDivWidthAvg = 5;
     static float channelArcRadiusDivWidthDev = 2;
@@ -42,10 +44,6 @@ public class StsChannelGeometryPanel extends StsJPanel
     static float channelArcAngleDev = 45;
     static float channelLineLengthDivWidthAvg = 4;
     static float channelLineLengthDivWidthDev = 2;
-
-    static byte LINE = 1;
-    static byte ARC = 2;
-    static byte[] typeList = new byte[] { LINE, ARC };
 
     private StsChannelSet channelSet;
 
@@ -71,6 +69,7 @@ public class StsChannelGeometryPanel extends StsJPanel
         channelArcAngleDistribBox = new StsRandomDistribGroupBox(channelArcAngleAvg, channelArcAngleDev, StsRandomDistribFace.TYPE_GAUSS, "Channel arc angle");
         channelLineLengthDivWidthDistribBox = new StsRandomDistribGroupBox(channelLineLengthDivWidthAvg, channelLineLengthDivWidthDev, StsRandomDistribFace.TYPE_LOGNORM, "Channel line/width length");
         buildButton = new StsButtonFieldBean("Build", "Execute build for this set.", this, "build");
+        buildGridButton = new StsButtonFieldBean("Build Grid", "Build the 3D grid.", this, "buildGrid");
     }
 
     public void initialize()
@@ -86,7 +85,8 @@ public class StsChannelGeometryPanel extends StsJPanel
         addEndRow(channelArcRadiusDivWidthDistribBox);
         addEndRow(channelArcAngleDistribBox);
         addEndRow(channelLineLengthDivWidthDistribBox);
-        addEndRow(buildButton);
+        addToRow(buildButton);
+        addEndRow(buildGridButton);
         wizard.rebuild();
     }
 
@@ -104,8 +104,10 @@ public class StsChannelGeometryPanel extends StsJPanel
         StsChannelSet channelSet = ((StsCreateChannelsWizard)wizard).getChannelSet();
         StsObjectRefList channels = channelSet.getChannels();
         Iterator<StsChannel> iter = channels.getIterator();
-        Random random = new Random();
         boolean lastRotateCW = true;
+        // don't draw views until construction complete
+        wizard.model.disableDisplay();
+        wizard.disableNext();
         while(iter.hasNext())
         {
             StsChannel channel = iter.next();
@@ -166,75 +168,32 @@ public class StsChannelGeometryPanel extends StsJPanel
             channel.channelSegments = segments.toArray(new StsChannelSegment[0]);
             channelSet.setChannelsState(StsChannelSet.CHANNELS_ARCS);
         }
+        wizard.model.enableDisplay();
+        wizard.enableFinish();
+        wizard.model.win3dDisplay();
     }
-    public void buildx()
+
+    public void buildGrid()
     {
         StsChannelSet channelSet = ((StsCreateChannelsWizard)wizard).getChannelSet();
         StsObjectRefList channels = channelSet.getChannels();
+        float nSlices = geoModelVolume.getNSlices();
+
+        StsRotatedGridBoundingBox centeredGrid = geoModelVolume.createCenteredGrid();
         Iterator<StsChannel> iter = channels.getIterator();
-        Random random = new Random();
-        boolean lastRotateCW = true;
+        // don't draw views until construction complete
+        wizard.model.disableDisplay();
+        wizard.disableNext();
         while(iter.hasNext())
         {
             StsChannel channel = iter.next();
-            StsPoint startPoint = channel.getStartPoint();
-            float channelDirection = channel.getDirection();
-            float segmentDirection = channelDirection;
-            boolean isArc = random.nextBoolean();
-            StsPoint lastPoint = startPoint;
-            StsChannelSegment segment;
-            ArrayList<StsChannelSegment> segments = new ArrayList<>();
-            while(insideVolume(geoModelVolume, lastPoint))
-            {
-                if(isArc)
-                {
-                    float radius = (float) channelArcRadiusDivWidthDistribBox.getSample();
-                    float arcAngle = (float)channelArcAngleDistribBox.getSample();
-                    double rotationAngle = StsChannelArcSegment.subtractAngles(segmentDirection, channelDirection);
-                    // if segmentDirection is more than 30 degrees away from channel direction, rotate the opposite way;
-                    // otherwise rotate the opposite of the previous rotation
-                    boolean rotateCW;
-                    if(rotationAngle > 30)
-                        rotateCW = true;
-                    else if(rotationAngle < -30)
-                        rotateCW = false;
-                    else
-                        rotateCW = !lastRotateCW;
-
-                    // if we need to rotate CCW back towards the channelDirection, then make our next rotation CCW, otherwise CW
-                    // a clockwise rotation is negative
-                    if(rotateCW) arcAngle = -arcAngle;
-                    // if we are reversing rotation or the current segment direction is more than 90 degrees from channel direction,
-                    // don't insert a line segment (isArc == true indicates next segment is an arc).
-                    isArc = Math.abs(rotationAngle) > limitAddLineAngle || lastRotateCW != rotateCW;
-                    // In this case, don't let the reverse rotation to go more than 120 degrees the other side of the channel direction.
-                    if(isArc)
-                    {
-                        nextSegmentDirection = segmentDirection + arcAngle; // wrap past 180 to keep track of winding
-                        nextRotationAngle = nextSegmentDirection - channelDirection; // wrap past 180 to keep track of winding
-                        if (nextRotationAngle < -limitRotateAngle)
-                            arcAngle += -limitRotateAngle - nextRotationAngle;
-                        else if (nextRotationAngle > limitRotateAngle)
-                            arcAngle -= nextRotationAngle - limitRotateAngle;
-                    }
-                    segment = new StsChannelArcSegment(channel, segmentDirection, radius, arcAngle, lastPoint);
-                    segmentDirection += arcAngle;
-
-                    lastRotateCW = rotateCW;
-                    // segmentDirection = StsChannelArcSegment.addAngles(segmentDirection, arcAngle);
-                }
-                else
-                {
-                    float length = (float) channelLineLengthDivWidthDistribBox.getSample();
-                    segment = new StsChannelLineSegment(channel, lastPoint, segmentDirection, length);
-                    isArc = true;
-                }
-                lastPoint = segment.getLastPoint();
-                segments.add(segment);
-            }
-            channel.channelSegments = segments.toArray(new StsChannelSegment[0]);
-            channelSet.setChannelsState(StsChannelSet.CHANNELS_ARCS);
+            for(StsChannelSegment channelSegment : channel.channelSegments)
+                channelSegment.buildGrids(geoModelVolume);
+            channelSet.setChannelsState(StsChannelSet.CHANNELS_GRIDS);
         }
+        wizard.model.enableDisplay();
+        wizard.enableFinish();
+        wizard.model.win3dDisplay();
     }
 
     private boolean insideVolume(StsGeoModelVolume geoModelVolume, StsPoint lastPoint)

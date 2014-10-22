@@ -297,8 +297,8 @@ public class StsZoneBlock extends StsRotatedGridBoundingSubBox implements StsSel
         {
             zone.checkLoadSubHorizonGrids();
 
-            int nRows = getNRows();
-            int nCols = getNCols();
+            int nRows = getNSubRows();
+            int nCols = getNSubCols();
             nSubZones = zone.getNSubZones();
 
             if( nSubZones == 0 )
@@ -402,8 +402,8 @@ public class StsZoneBlock extends StsRotatedGridBoundingSubBox implements StsSel
 
     private void constructLayerGrid(int nLayers, float[][][] subZoneGridZ, int subZoneType)
     {
-        int nRows = getNRows();
-        int nCols = getNCols();
+        int nRows = getNSubRows();
+        int nCols = getNSubCols();
         for(int i = 0; i < nRows; i++)
         {
             for(int j = 0; j < nCols; j++)
@@ -684,8 +684,8 @@ public class StsZoneBlock extends StsRotatedGridBoundingSubBox implements StsSel
 
             int nSubZone = subZoneAndLayer[0];
             int nSubZoneSlice = subZoneAndLayer[1];
-            int nRows = getNRows();
-            int nCols = getNCols();
+            int nRows = getNSubRows();
+            int nCols = getNSubCols();
             float[][] sliceZs = new float[nRows][nCols];
             for(i = rowMin, ii = 0; i <= rowMax; i++, ii++)
                 for(j = colMin, jj = 0; j <= colMax; j++, jj++)

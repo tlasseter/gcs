@@ -119,9 +119,9 @@ public class StsPropertyVolume extends StsRotatedGridBoundingSubBox
         else if(distributionType == PROP_VARIABLE_Z)
             return getNSlices();
         else if(distributionType == PROP_VARIABLE_XY)
-            return getNRows()*getNCols();
+            return getNSubRows()* getNSubCols();
         else if(distributionType == PROP_VARIABLE_XYZ)
-            return  getNRows()*getNCols()*getNSlices();
+            return  getNSubRows()* getNSubCols()*getNSlices();
         else
         {
             StsException.systemError(this, "getNPoints", "Undefined property distributionType " + distributionType + " for property " + toDetailString());
@@ -227,8 +227,8 @@ public class StsPropertyVolume extends StsRotatedGridBoundingSubBox
     }
 
    /** accessors */
-    public int getNX() { return getNRows(); }
-    public int getNY() { return getNCols(); }
+    public int getNX() { return getNSubRows(); }
+    public int getNY() { return getNSubCols(); }
     public int getNLayers() { return getNSlices(); }
     public float getXInc() { return xInc; }
     public float getYInc() { return yInc; }
@@ -553,10 +553,10 @@ public class StsPropertyVolume extends StsRotatedGridBoundingSubBox
                     System.arraycopy(inputVolume.values, 0, values, topLayerNumber, nLayers);
                 else if(distributionType == PROP_VARIABLE_XY)
                 {
-                    int nRows = getNRows();
-                    int nCols = getNCols();
-                    int nInputRows = inputVolume.getNRows();
-                    int nInputCols = inputVolume.getNCols();
+                    int nRows = getNSubRows();
+                    int nCols = getNSubCols();
+                    int nInputRows = inputVolume.getNSubRows();
+                    int nInputCols = inputVolume.getNSubCols();
                     if(nInputRows == nRows && nInputCols == nCols)
                         values = inputVolume.values;
                     else
@@ -564,10 +564,10 @@ public class StsPropertyVolume extends StsRotatedGridBoundingSubBox
                 }
                 else if(distributionType == PROP_VARIABLE_XYZ)
                 {
-                    int nRows = getNRows();
-                    int nCols = getNCols();
-                    int nInputRows = inputVolume.getNRows();
-                    int nInputCols = inputVolume.getNCols();
+                    int nRows = getNSubRows();
+                    int nCols = getNSubCols();
+                    int nInputRows = inputVolume.getNSubRows();
+                    int nInputCols = inputVolume.getNSubCols();
                     if(nInputRows == nRows && nInputCols == nCols)
                         System.arraycopy(inputVolume.values, 0, values, topLayerNumber*nRows*nCols, nRows*nCols*nLayers);
                     else
@@ -593,7 +593,7 @@ public class StsPropertyVolume extends StsRotatedGridBoundingSubBox
 
     public boolean insideBlockGrid(int row, int col)
     {
-        return row >= 0 && row < getNRows() && col >= 0 && col < getNCols();
+        return row >= 0 && row < getNSubRows() && col >= 0 && col < getNSubCols();
     }
 
     public boolean insideGrid(int row, int col)

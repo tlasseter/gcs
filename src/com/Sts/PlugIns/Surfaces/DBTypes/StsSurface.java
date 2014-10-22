@@ -7099,7 +7099,7 @@ public class StsSurface extends StsRotatedGridBoundingBox implements StsSelectab
      }
 
      StsGridIterator gridIterator = new StsGridIterator(this);
-     int nGridRows = gridIterator.getNRows();
+     int nGridRows = gridIterator.getNSubRows();
      tStrips = new StsList(nGridRows, nGridRows);
 
      while((row = gridIterator.getNextRow()) != nullInteger)

@@ -444,7 +444,7 @@ public class StsDualSurfaceSubVolume extends StsSubVolume implements StsTreeObje
     {
         StsRotatedGridBoundingSubBox boundingBox = new StsRotatedGridBoundingSubBox(false);
         StsRotatedGridBoundingBox cursor3dBoundingBox = currentModel.getProject().getRotatedBoundingBox();
-        boundingBox.initialize(cursor3dBoundingBox);
+        boundingBox.initializeBoundingBoxAndSubBox(cursor3dBoundingBox);
         float zMin = topSurface.getZMin();
         boundingBox.setZMin(zMin);
         boundingBox.sliceMin = Math.max(0, StsMath.floor(cursor3dBoundingBox.getSliceCoor(zMin)));

@@ -152,8 +152,8 @@ public class StsBlock extends StsRotatedGridBoundingSubBox implements StsTreeObj
 
     public boolean initialize(StsModel model)
     {
-        nCellRows = getNRows() - 1;
-        nCellCols = getNCols() - 1;
+        nCellRows = getNSubRows() - 1;
+        nCellCols = getNSubCols() - 1;
         return true;
     }
 
@@ -451,20 +451,20 @@ public class StsBlock extends StsRotatedGridBoundingSubBox implements StsTreeObj
             StsBlockGrid blockGrid = (StsBlockGrid) blockGrids.getElement(n);
             addBoundingBox(blockGrid.getGridBoundingBox());
         }
-        nCellRows = getNRows() - 1;
-        nCellCols = getNCols() - 1;
+        nCellRows = getNSubRows() - 1;
+        nCellCols = getNSubCols() - 1;
         //        boundingBox.addBorder(5, currentModel.getGridDefinition());
     }
 
     public float getBlockXCoor(int blockCol)
     {
-        blockCol = StsMath.minMax(blockCol, 0, getNCols() - 1);
+        blockCol = StsMath.minMax(blockCol, 0, getNSubCols() - 1);
         return blockCol * xInc + xMin;
     }
 
     public float getBlockYCoor(int blockRow)
     {
-        blockRow = StsMath.minMax(blockRow, 0, getNRows() - 1);
+        blockRow = StsMath.minMax(blockRow, 0, getNSubRows() - 1);
         return blockRow * yInc + yMin;
     }
 
@@ -622,8 +622,8 @@ public class StsBlock extends StsRotatedGridBoundingSubBox implements StsTreeObj
 
     public void constructCellColumns(int nTotalLayers)
     {
-        int nRows = getNRows();
-        int nCols = getNCols();
+        int nRows = getNSubRows();
+        int nCols = getNSubCols();
         nCellRows = nRows - 1;
         nCellCols = nCols - 1;
         int nZoneBlocks = zoneBlocks.getSize();

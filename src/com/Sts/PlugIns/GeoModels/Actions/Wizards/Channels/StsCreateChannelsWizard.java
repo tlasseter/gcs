@@ -44,7 +44,8 @@ public class StsCreateChannelsWizard extends StsWizard
         // addSteps();
         if (!super.start()) return false;
         dialog.setTitle("Construct Volume for GeoModel");
-        this.enableFinish();
+        disableFinish();
+        disableNext();
         return true;
     }
 
@@ -61,29 +62,6 @@ public class StsCreateChannelsWizard extends StsWizard
 
     public void previous() {
         gotoPreviousStep();
-    }
-    public void setVolumeName(String name) {
-        this.volName = name;
-    }
-    public String getVolumeName() {
-        return volName;
-    }
-    public boolean buildVolume(StsProgressPanel ppanel) {
-        return true;
-    }
-    // public StsGeoModelVolume getGeoModelVolume() { return channelAxes.panel.getGeoModelVolume(); }
-
-    public boolean addToProjectAndModel(StsGeoModelVolume geoModelVolume)
-    {
-        StsProject project = model.getProject();
-        if(!project.addToProject(geoModelVolume, StsParameters.TD_DEPTH))
-        {
-            new StsMessage(null, StsMessage.WARNING, "Failed to add bounding box to project.");
-            return false;
-        }
-        project.initializeViews();
-        geoModelVolume.addToModel();
-        return true;
     }
 
     public StsChannelSet getChannelSet()

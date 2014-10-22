@@ -129,8 +129,8 @@ public class StsPickPatch extends StsMainObject
 /*
     public void initializeGrid(StsSurface surface)
     {
-        nRows = surface.getNRows();
-        nCols = surface.getNCols();
+        nRows = surface.getNSubRows();
+        nCols = surface.getNSubCols();
         if(pointsZ == null) pointsZ = new float[nRows][nCols];
         if(pointsNull == null)
         {

@@ -26,6 +26,7 @@ public class StsChannelSet extends StsRotatedGridBoundingBox implements StsTreeO
     static public byte CHANNELS_NONE = 0;
     static public byte CHANNELS_AXES = 1;
     static public byte CHANNELS_ARCS = 2;
+    static public byte CHANNELS_GRIDS = 2;
 
     static public final StsFieldBean[] displayFields =
     {
@@ -102,5 +103,15 @@ public class StsChannelSet extends StsRotatedGridBoundingBox implements StsTreeO
     public void setChannelsState(byte channelsState)
     {
         this.channelsState = channelsState;
+    }
+
+    public StsGeoModelVolume getGeoModelVolume()
+    {
+        return geoModelVolume;
+    }
+
+    public void setGeoModelVolume(StsGeoModelVolume geoModelVolume)
+    {
+        this.geoModelVolume = geoModelVolume;
     }
 }

@@ -3,8 +3,12 @@ package com.Sts.PlugIns.GeoModels.Types;
 import com.Sts.Framework.MVC.Views.StsGLPanel3d;
 import com.Sts.Framework.Types.StsColor;
 import com.Sts.Framework.Types.StsPoint;
+import com.Sts.Framework.Types.StsRotatedGridBoundingBox;
 import com.Sts.Framework.Utilities.StsGLDraw;
 import com.Sts.PlugIns.GeoModels.DBTypes.StsChannel;
+import com.Sts.PlugIns.GeoModels.DBTypes.StsChannelClass;
+import com.Sts.PlugIns.GeoModels.DBTypes.StsChannelSet;
+import com.Sts.PlugIns.GeoModels.DBTypes.StsGeoModelVolume;
 
 import javax.media.opengl.GL;
 
@@ -45,7 +49,7 @@ public class StsChannelLineSegment extends StsChannelSegment
         return true;
     }
 
-    public void display(StsGLPanel3d glPanel3d, boolean displayCenterLinePoints, boolean drawFilled, StsColor stsColor)
+    public void display(StsGLPanel3d glPanel3d, boolean displayCenterLinePoints, byte channelsState, byte drawType, StsColor stsColor)
     {
         GL gl = glPanel3d.getGL();
 
@@ -55,11 +59,15 @@ public class StsChannelLineSegment extends StsChannelSegment
         if (displayCenterLinePoints)
         {
             glPanel3d.setViewShift(gl, 1.0f);
-            StsGLDraw.drawPoint(gl, centerLinePoints[0].v, StsColor.WHITE, 6);
+            StsGLDraw.drawPoint(gl, centerLinePoints[0].v, StsColor.GREEN, 6);
             glPanel3d.resetViewShift(gl);
         }
-        if(drawFilled)
-            StsGLDraw.drawTwoLineStrip(gl, innerPoints, outerPoints, innerPoints.length);
+        if(drawType == StsChannelClass.DRAW_FILLED && channelsState >= StsChannelSet.CHANNELS_ARCS)
+            StsGLDraw.drawTwoLineStrip(gl, innerPoints, outerPoints, innerPoints.length, stsColor);
+        else if(drawType == StsChannelClass.DRAW_GRID && channelsState == StsChannelSet.CHANNELS_GRIDS)
+        {
+            channelCellGrid.display(gl, stsColor, false);
+        }
     }
 
     public void fillSerializableArrays(int index, byte[] segmentTypes, StsPoint[] startPoints, float[] startDirections, float[] sizes, float[] arcs)
@@ -70,4 +78,10 @@ public class StsChannelLineSegment extends StsChannelSegment
         sizes[index] = length;
         arcs[index] = 0;
     }
+
+    public void buildGrids(StsGeoModelVolume geoModelVolume)
+    {
+        channelCellGrid = new StsSegmentCellGrid(outerPoints, innerPoints, geoModelVolume, startPoint.getZ());
+    }
+
 }

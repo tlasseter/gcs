@@ -12,10 +12,12 @@ import com.Sts.Framework.MVC.Views.StsView3d;
 import com.Sts.Framework.Types.StsColor;
 import com.Sts.Framework.Types.StsPoint;
 import com.Sts.Framework.Types.StsRotatedGridBoundingBox;
+import com.Sts.Framework.Types.StsRotatedGridBoundingSubBox;
 import com.Sts.Framework.UI.Beans.*;
 import com.Sts.Framework.UI.ObjectPanel.StsObjectPanel;
 import com.Sts.Framework.UI.StsMessageFiles;
 import com.Sts.Framework.Utilities.StsGLDraw;
+import com.Sts.Framework.Utilities.StsMath;
 import com.Sts.PlugIns.GeoModels.Types.StsChannelArcSegment;
 import com.Sts.PlugIns.GeoModels.Types.StsChannelLineSegment;
 import com.Sts.PlugIns.GeoModels.Types.StsChannelSegment;
@@ -29,7 +31,7 @@ import java.io.Serializable;
  * All Rights Reserved
  * No part of this website or any of its contents may be reproduced, copied, modified or adapted, without the prior written consent of the author, unless otherwise indicated for stand-alone materials.
  */
-public class StsChannel extends StsRotatedGridBoundingBox implements StsTreeObjectI, StsXYGridable, Serializable, Cloneable, StsCustomSerializable
+public class StsChannel extends StsRotatedGridBoundingSubBox implements StsTreeObjectI, StsXYGridable, Serializable, Cloneable, StsCustomSerializable
 {
     private StsChannelSet channelSet;
     private float channelWidth;
@@ -52,7 +54,7 @@ public class StsChannel extends StsRotatedGridBoundingBox implements StsTreeObje
     static protected StsObjectPanel objectPanel = null;
 
     /** these are colors used in drawing line; actual color is defined by nColor */
-    static public StsColor[] colorList = StsColor.basic32Colors;
+    static public StsColor[] colorList = StsColor.greyPluscolors32;
 
     static public final StsFieldBean[] displayFields =
     {
@@ -83,8 +85,15 @@ public class StsChannel extends StsRotatedGridBoundingBox implements StsTreeObje
         this.startPoint = firstPoint;
         this.endPoint = lastPoint;
         this.direction = direction;
-        nColor = getIndex() % 32;
+        nColor = (getIndex()% 31) + 1;  // color 0 is reserved for background (grey), loop over other 31 colors
         stsColor = colorList[nColor];
+
+        // initialize the boundingBox container to the geoModelVolume
+        // set the slice range in this subBox based on top and thickness
+        initialize(channelSet.getGeoModelVolume());
+        float zTop = startPoint.getZ();
+        sliceMin = Math.round(getSliceCoor(zTop));
+        sliceMax = Math.round(getSliceCoor(zTop + channelThickness));
     }
 
     public boolean initialize(StsModel model)
@@ -92,11 +101,14 @@ public class StsChannel extends StsRotatedGridBoundingBox implements StsTreeObje
         if(channelSegments == null) return true;
         stsColor = colorList[nColor];
         for(StsChannelSegment channelSegment : channelSegments)
-            if(!channelSegment.computePoints()) return false;
+        {
+            if (!channelSegment.computePoints()) return false;
+            channelSegment.buildGrids(channelSet.getGeoModelVolume());
+        }
         return true;
     }
 
-    public void display(StsGLPanel3d glPanel3d, boolean displayCenterLinePoints, boolean displayAxes, boolean drawFilled)
+    public void display(StsGLPanel3d glPanel3d, boolean displayCenterLinePoints, boolean displayAxes, byte drawType)
     {
         GL gl = glPanel3d.getGL();
 
@@ -105,7 +117,7 @@ public class StsChannel extends StsRotatedGridBoundingBox implements StsTreeObje
         {
             StsGLDraw.drawLine(gl, stsColor, true, new StsPoint[] { startPoint, endPoint});
         }
-        else if(channelsState == StsChannelSet.CHANNELS_ARCS)
+        else if(channelsState == StsChannelSet.CHANNELS_ARCS || channelsState == StsChannelSet.CHANNELS_GRIDS)
         {
             if (!currentModel.useDisplayLists && usingDisplayLists)
             {
@@ -124,7 +136,7 @@ public class StsChannel extends StsRotatedGridBoundingBox implements StsTreeObje
                         return;
                     }
                     gl.glNewList(displayListNum, GL.GL_COMPILE_AND_EXECUTE);
-                    drawChannelSegments(glPanel3d, displayCenterLinePoints, drawFilled);
+                    drawChannelSegments(glPanel3d, displayCenterLinePoints, channelsState, drawType);
                     gl.glEndList();
 
                     //timer.stop("display list surface setup: ");
@@ -132,15 +144,15 @@ public class StsChannel extends StsRotatedGridBoundingBox implements StsTreeObje
                 gl.glCallList(displayListNum);
             }
             else
-                drawChannelSegments(glPanel3d, displayCenterLinePoints, drawFilled);
-
+                drawChannelSegments(glPanel3d, displayCenterLinePoints, channelsState, drawType);
         }
     }
 
-    private void drawChannelSegments(StsGLPanel3d glPanel3d, boolean displayCenterLinePoints, boolean drawFilled)
+    private void drawChannelSegments(StsGLPanel3d glPanel3d, boolean displayCenterLinePoints, byte channelsState, byte drawType)
     {
+        if(channelSegments == null) return;
         for (StsChannelSegment channelSegment : channelSegments)
-            channelSegment.display(glPanel3d, displayCenterLinePoints, drawFilled, stsColor);
+            channelSegment.display(glPanel3d, displayCenterLinePoints, channelsState, drawType, stsColor);
     }
 
     public void deleteDisplayLists(GL gl)

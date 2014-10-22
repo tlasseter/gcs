@@ -259,8 +259,8 @@ public class StsHorpick extends StsMainObject implements StsTreeObjectI
              }
              else
              {
-                 int nRows = surface.getNRows();
-                 int nCols = surface.getNCols();
+                 int nRows = surface.getNSubRows();
+                 int nCols = surface.getNSubCols();
                  float[][] surfacePointsZ = surface.getPointsZ();
                  byte[][] surfacePointsNull = surface.getPointsNull();
                  float[][] patchPointsZ = patch.getPointsZ();

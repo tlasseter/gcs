@@ -13,7 +13,7 @@ import com.Sts.Framework.Utilities.*;
 
 import java.util.*;
 
-// add row and col limits to bounding box
+/** A boundingSubBox has a larger boundingBox and a congruent subBox defined within it. */
 public class StsRotatedGridBoundingSubBox extends StsRotatedGridBoundingBox implements StsXYGridable, Cloneable
 {
     public int rowMin = largeInt; // row at yMin
@@ -51,7 +51,7 @@ public class StsRotatedGridBoundingSubBox extends StsRotatedGridBoundingBox impl
     public StsRotatedGridBoundingSubBox(StsRotatedGridBoundingBox boundingBox)
     {
 		super();
-        initialize(boundingBox);
+        initializeBoundingBoxAndSubBox(boundingBox);
     }
 
     public StsRotatedGridBoundingSubBox(StsRotatedGridBoundingSubBox box)
@@ -86,23 +86,40 @@ public class StsRotatedGridBoundingSubBox extends StsRotatedGridBoundingBox impl
         super(persistent, name);
     }
 
-    public void initialize(StsRotatedGridBoundingBox rotatedBoundingBox)
+    /** Initialize boundingBox to passed in boundingBox and initialize subBox to the same box.
+     *  If we call initialize(rotatedBoundingBox), it will be executed by the superclass boundingBox and
+     *  this subBox will be left uninitialized.
+     * @param rotatedBoundingBox  the larger boundingBox containing this subBox.
+     */
+    public void initializeBoundingBoxAndSubBox(StsRotatedGridBoundingBox rotatedBoundingBox)
     {
 		super.initialize(rotatedBoundingBox);
-		nRows = rotatedBoundingBox.nRows;
-		nCols = rotatedBoundingBox.nCols;
         rowMin = 0;
         rowMax = nRows - 1;
         colMin = 0;
         colMax = nCols - 1;
         sliceMin = 0;
         sliceMax = rotatedBoundingBox.nSlices - 1;
-		rowNumMin = rotatedBoundingBox.rowNumMin;
-		rowNumMax = rotatedBoundingBox.rowNumMax;
-		colNumMin = rotatedBoundingBox.colNumMin;
-		colNumMax = rotatedBoundingBox.colNumMax;
-		rowNumInc = rotatedBoundingBox.rowNumInc;
-		colNumInc = rotatedBoundingBox.colNumInc;
+        rowRangeOK = true;
+        colRangeOK = true;
+    }
+
+    /** initialize the larger boundingBox only; leave subBox uninitialized. */
+    public void initialize(StsRotatedGridBoundingBox gridBoundingBox)
+    {
+        super.initialize(gridBoundingBox);
+    }
+
+    /** initialize this subBox to an existing subBox. */
+    public void initialize(StsRotatedGridBoundingSubBox gridBoundingBox)
+    {
+        super.initialize(gridBoundingBox);
+        rowMin = gridBoundingBox.rowMin;
+        rowMax = gridBoundingBox.rowMax;
+        colMin = gridBoundingBox.colMin;
+        colMax = gridBoundingBox.colMax;
+        sliceMin = gridBoundingBox.sliceMin;
+        sliceMax = gridBoundingBox.sliceMax;
         rowRangeOK = true;
         colRangeOK = true;
     }
@@ -127,19 +144,6 @@ public class StsRotatedGridBoundingSubBox extends StsRotatedGridBoundingBox impl
         rowMax--;
         colMax--;
         sliceMax--;
-    }
-
-    public void initialize(StsRotatedGridBoundingSubBox gridBoundingBox)
-    {
-		super.initialize(gridBoundingBox);
-        rowMin = gridBoundingBox.rowMin;
-        rowMax = gridBoundingBox.rowMax;
-        colMin = gridBoundingBox.colMin;
-        colMax = gridBoundingBox.colMax;
-        sliceMin = gridBoundingBox.sliceMin;
-        sliceMax = gridBoundingBox.sliceMax;
-        rowRangeOK = true;
-        colRangeOK = true;
     }
 
     /** classInitialize this instance of StsRotatedGridBoundingSubBox so that it is the size of the subVolumeBoundingBox.  Its row/col/slice
@@ -181,7 +185,7 @@ public class StsRotatedGridBoundingSubBox extends StsRotatedGridBoundingBox impl
         }
     }
 
-    public int getNRows()
+    public int getNSubRows()
     {
         if (rowRangeOK)
         {
@@ -193,7 +197,7 @@ public class StsRotatedGridBoundingSubBox extends StsRotatedGridBoundingBox impl
         }
     }
 
-    public int getNCols()
+    public int getNSubCols()
     {
         if (colRangeOK)
         {
@@ -212,12 +216,12 @@ public class StsRotatedGridBoundingSubBox extends StsRotatedGridBoundingBox impl
 
     public int getNCellRows()
     {
-        return getNRows() - 1;
+        return getNSubRows() - 1;
     }
 
     public int getNCellCols()
     {
-        return getNCols() - 1;
+        return getNSubCols() - 1;
     }
 
     public int getNCellSlices()
@@ -252,22 +256,22 @@ public class StsRotatedGridBoundingSubBox extends StsRotatedGridBoundingBox impl
 
     public boolean isInsideBlockCellRowColF(float blockRow, float blockCol)
     {
-        return blockRow >= 0 && blockRow < getNRows()-1 && blockCol >= 0 && blockCol < getNCols()-1;
+        return blockRow >= 0 && blockRow < getNSubRows()-1 && blockCol >= 0 && blockCol < getNSubCols()-1;
     }
 
     public boolean isInsideBlockRowCol(int blockRow, int blockCol)
     {
-        return blockRow >= 0 && blockRow < getNRows() && blockCol >= 0 && blockCol < getNCols();
+        return blockRow >= 0 && blockRow < getNSubRows() && blockCol >= 0 && blockCol < getNSubCols();
     }
 
     public boolean isInsideBlockRowColF(float blockRow, float blockCol)
     {
-        return blockRow >= 0 && blockRow < getNRows() && blockCol >= 0 && blockCol < getNCols();
+        return blockRow >= 0 && blockRow < getNSubRows() && blockCol >= 0 && blockCol < getNSubCols();
     }
 
     public boolean isInsideBlockCellRowCol(int blockRow, int blockCol)
     {
-        return blockRow >= 0 && blockRow < getNRows()-1 && blockCol >= 0 && blockCol < getNCols()-1;
+        return blockRow >= 0 && blockRow < getNSubRows()-1 && blockCol >= 0 && blockCol < getNSubCols()-1;
     }
 
     public void setGridMinMax(StsRotatedGridBoundingBox boundingBox)
@@ -479,6 +483,24 @@ public class StsRotatedGridBoundingSubBox extends StsRotatedGridBoundingBox impl
         colRangeOK = true;
     }
 
+    public void addPoint(StsGridCrossingPoint gridCrossingPoint)
+    {
+        if(gridCrossingPoint.isRow())
+        {
+            int row = Math.round(gridCrossingPoint.iF);
+            rowMin = Math.min(rowMin, row);
+            rowMax = Math.max(rowMax, row);
+            rowRangeOK = true;
+        }
+        if(gridCrossingPoint.isCol())
+        {
+            int col = Math.round(gridCrossingPoint.jF);
+            colMin = Math.min(colMin, col);
+            colMax = Math.max(colMax, col);
+            colRangeOK = true;
+        }
+    }
+
     public void addPoint(StsRowCol rowCol)
     {
         int rowOrCol = rowCol.getRowOrCol();
@@ -624,7 +646,7 @@ public class StsRotatedGridBoundingSubBox extends StsRotatedGridBoundingBox impl
 
     public int getNPoints()
     {
-        return getNRows()*getNCols()*getNSlices();
+        return getNSubRows()* getNSubCols()*getNSlices();
     }
 
     public int getNCells()
@@ -634,8 +656,8 @@ public class StsRotatedGridBoundingSubBox extends StsRotatedGridBoundingBox impl
 
     public int getBlockIndex3d(int blockRow, int blockCol, int slice)
     {
-        int nRows = getNRows();
-        int nCols = getNCols();
+        int nRows = getNSubRows();
+        int nCols = getNSubCols();
         blockRow = Math.min(blockRow, nRows-1);
         blockCol = Math.min(blockCol, nCols-1);
         return (slice*nRows + blockRow)*nCols + blockCol;
@@ -643,8 +665,8 @@ public class StsRotatedGridBoundingSubBox extends StsRotatedGridBoundingBox impl
 
     public int getIndex3d(int row, int col, int slice)
     {
-        int nRows = getNRows();
-        int nCols = getNCols();
+        int nRows = getNSubRows();
+        int nCols = getNSubCols();
         row = Math.min(row, rowMax);
         col = Math.min(col, colMax);
         slice = Math.min(slice, sliceMax);
@@ -653,8 +675,8 @@ public class StsRotatedGridBoundingSubBox extends StsRotatedGridBoundingBox impl
 
     public int getBlockIndex2d(int blockRow, int blockCol)
     {
-        int nRows = getNRows();
-        int nCols = getNCols();
+        int nRows = getNSubRows();
+        int nCols = getNSubCols();
         blockRow = Math.max(blockRow, nRows - 1);
         blockCol = Math.max(blockCol, nCols - 1);
         return blockRow*nCols + blockCol;
@@ -662,7 +684,7 @@ public class StsRotatedGridBoundingSubBox extends StsRotatedGridBoundingBox impl
 
     public int getIndex2d(int row, int col)
     {
-        int nCols = getNCols();
+        int nCols = getNSubCols();
         row = Math.max(row, rowMax);
         col = Math.max(col, colMax);
         return (row - rowMin)*nCols + (col - colMin);
@@ -949,8 +971,8 @@ public class StsRotatedGridBoundingSubBox extends StsRotatedGridBoundingBox impl
         StsBlock block = new StsBlock();
         StsRotatedGridBoundingSubBox boundingBox = new StsRotatedGridBoundingSubBox(0, 10, 0, 20);
         block.initialize(boundingBox);
-        int nRows = block.getNRows();
-        int nCols = block.getNCols();
+        int nRows = block.getNSubRows();
+        int nCols = block.getNSubCols();
         int nCellRows = nRows - 1;
         int nCellCols = nCols - 1;
         block.setBlockCellColumns(new StsBlock.BlockCellColumn[nCellRows][nCellCols]);

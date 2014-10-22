@@ -335,8 +335,8 @@ public class StsSeismicVelocityConstructor extends StsSeismicVolumeConstructor
 			attributeVolume.addToModel();
 			attributeVolume.refreshObjectPanel();
 
-			nInputRows = attributeVolume.getNRows();
-			nInputCols = attributeVolume.getNCols();
+			nInputRows = attributeVolume.getNSubRows();
+			nInputCols = attributeVolume.getNSubCols();
 			nInputSlices = attributeVolume.getNSlices();
 
 			if (isDataFloat) attributeVolume.createMappedRowBuffer("rw");

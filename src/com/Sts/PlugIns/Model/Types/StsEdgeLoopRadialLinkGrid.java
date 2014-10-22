@@ -81,8 +81,8 @@ public class StsEdgeLoopRadialLinkGrid
 
         loopBoundingBox = grid.getGridBoundingBox();
 
-        rowLinks = new StsEdgeLoopRadialGridLink[loopBoundingBox.getNRows()];
-        colLinks = new StsEdgeLoopRadialGridLink[loopBoundingBox.getNCols()];
+        rowLinks = new StsEdgeLoopRadialGridLink[loopBoundingBox.getNSubRows()];
+        colLinks = new StsEdgeLoopRadialGridLink[loopBoundingBox.getNSubCols()];
     }
 
     public StsEdgeLoopRadialLinkGrid(StsSection section, StsEdgeLoop edgeLoop)
@@ -106,8 +106,8 @@ public class StsEdgeLoopRadialLinkGrid
         }
 
         loopBoundingBox = computeLoopBoundingBox(edgeLoop);
-        int nRows = loopBoundingBox.getNRows();
-        int nCols = loopBoundingBox.getNCols();
+        int nRows = loopBoundingBox.getNSubRows();
+        int nCols = loopBoundingBox.getNSubCols();
         rowLinks = new StsEdgeLoopRadialGridLink[nRows];
         colLinks = new StsEdgeLoopRadialGridLink[nCols];
 

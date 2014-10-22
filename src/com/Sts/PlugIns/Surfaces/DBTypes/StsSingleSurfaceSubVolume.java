@@ -133,7 +133,7 @@ public class StsSingleSurfaceSubVolume extends StsSubVolume implements StsTreeOb
 	 {
 		 StsRotatedGridBoundingSubBox boundingBox = new StsRotatedGridBoundingSubBox(false);
 		 StsRotatedGridBoundingBox cursor3dBoundingBox = currentModel.getProject().getRotatedBoundingBox();
-		 boundingBox.initialize(cursor3dBoundingBox);
+		 boundingBox.initializeBoundingBoxAndSubBox(cursor3dBoundingBox);
 		 float zMin = surface.getZMin() + topOffset;
 		 boundingBox.setZMin(zMin);
 		 boundingBox.sliceMin = Math.max(0, StsMath.floor(cursor3dBoundingBox.getSliceCoor(zMin)));
@@ -259,7 +259,7 @@ public class StsSingleSurfaceSubVolume extends StsSubVolume implements StsTreeOb
     {
         StsRotatedGridBoundingSubBox boundingBox = new StsRotatedGridBoundingSubBox(false);
         StsRotatedGridBoundingBox cursor3dBoundingBox = currentModel.getProject().getRotatedBoundingBox();
-        boundingBox.initialize(cursor3dBoundingBox);
+        boundingBox.initializeBoundingBoxAndSubBox(cursor3dBoundingBox);
         float zMin = surface.getZMin() + topOffset;
         boundingBox.setZMin(zMin);
         boundingBox.sliceMin = Math.max(0, StsMath.floor(cursor3dBoundingBox.getSliceCoor(zMin)));

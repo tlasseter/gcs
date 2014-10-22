@@ -1,6 +1,8 @@
 package com.Sts.Framework.Types;
 
 import com.Sts.Framework.Interfaces.*;
+import com.Sts.Framework.UI.StsMessage;
+import com.Sts.Framework.UI.StsMessageFiles;
 import com.Sts.Framework.Utilities.*;
 
 /**
@@ -16,18 +18,19 @@ import com.Sts.Framework.Utilities.*;
   * indenpendent of the enclosing class.
   */
 
- public class StsGridCrossingPoint
+ public class StsGridCrossingPoint implements Comparable<StsGridCrossingPoint>
  {
-     public StsPoint point;
      /** xyz and f values at this point */
-     public float iF, jF;
+     public StsPoint point;
      /** float grid index coordinates */
-     public int rowOrCol;
+     public float iF, jF;
      /** indicates point is on ROW I or COL J */
+     public int rowOrCol;
+     /** indicates direction on ROW or COL away from RIGHT side of line */
      public int rowConnect = NONE;
      /** indicates direction on ROW or COL away from RIGHT side of line */
      public int colConnect = NONE;
-     /** indicates direction on ROW or COL away from RIGStsXYGridable e */
+
      public float gridLength;
 
     protected static final int MINUS = StsParameters.MINUS;
@@ -191,6 +194,26 @@ import com.Sts.Framework.Utilities.*;
          if (rowOrCol == COL || rowOrCol == ROWCOL)
              if ((int) jF != (int) otherGridPoint.jF) return false;
          return true;
+     }
+
+     public boolean isRow() { return rowOrCol == ROW || rowOrCol == ROWCOL; }
+
+     public boolean isCol() { return rowOrCol == COL || rowOrCol == ROWCOL; }
+
+     public boolean isRowOrCol() { return isRow() || isCol(); }
+
+     public int getRow() { return Math.round(iF); }
+
+     public int getCol() { return Math.round(jF); }
+
+     public int compareTo(StsGridCrossingPoint otherPoint)
+     {
+        if(isRow() && otherPoint.isRow())
+            return Math.round(jF - otherPoint.jF);
+        if(isCol() && otherPoint.isCol())
+             return Math.round(iF - otherPoint.iF);
+        new StsMessage(null, StsMessage.WARNING, "compareTo failed for StsGridCrossingPoints: " + toString() + " and "+ otherPoint.toString() );
+        return -1;
      }
 
      public String toString()

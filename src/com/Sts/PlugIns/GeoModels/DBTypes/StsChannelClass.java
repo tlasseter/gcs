@@ -7,8 +7,10 @@ import com.Sts.Framework.Interfaces.MVC.StsRotatedClass;
 import com.Sts.Framework.Interfaces.StsTreeObjectI;
 import com.Sts.Framework.MVC.Views.StsGLPanel3d;
 import com.Sts.Framework.UI.Beans.StsBooleanFieldBean;
+import com.Sts.Framework.UI.Beans.StsComboBoxFieldBean;
 import com.Sts.Framework.UI.Beans.StsFieldBean;
 import com.Sts.Framework.UI.Beans.StsIntFieldBean;
+import com.Sts.Framework.Utilities.StsParameters;
 
 import java.util.Iterator;
 
@@ -19,11 +21,18 @@ public class StsChannelClass extends StsModelObjectPanelClass implements StsSeri
     private boolean displayCenterLinePoints = false;
     private boolean displayChanged = false;
     private int numberInSelectedGroup = 5;
-    private boolean drawFilled = false;
+    private byte drawType = DRAW_LINES;
     public StsChannelClass()
     {
     }
 
+    static public final byte DRAW_LINES = 0;
+    static public final byte DRAW_FILLED = 1;
+    static public final byte DRAW_GRID = 2;
+    static public final String DRAW_LINES_STRING = "Draw lines";
+    static public final String DRAW_FILLED_STRING = "Draw filled";
+    static public final String DRAW_GRID_STRING = "Draw grid";
+    static final String[] DRAW_TYPE_STRINGS = new String[] { DRAW_LINES_STRING,  DRAW_FILLED_STRING, DRAW_GRID_STRING };
     public void initializeDisplayFields()
     {
         displayFields = new StsFieldBean[]
@@ -32,7 +41,7 @@ public class StsChannelClass extends StsModelObjectPanelClass implements StsSeri
             new StsBooleanFieldBean(this, "displaySelectedChannel", "Display selected channel"),
             new StsBooleanFieldBean(this, "displayCenterLinePoints", "Display points"),
             new StsIntFieldBean(this, "numberInSelectedGroup", 1, 10, "Number to display"),
-            new StsBooleanFieldBean(this, "drawFilled", "Display filled."),
+            new StsComboBoxFieldBean(this, "drawType", "Display filled.", DRAW_TYPE_STRINGS)
         };
     }
 
@@ -60,14 +69,14 @@ public class StsChannelClass extends StsModelObjectPanelClass implements StsSeri
             if(numberInSelectedGroup == 1)
             {
                 StsChannel channel = (StsChannel)getCurrentObject();
-                channel.display(glPanel3d, displayCenterLinePoints, displayAxes, drawFilled);
+                channel.display(glPanel3d, displayCenterLinePoints, displayAxes, drawType);
             }
             else
             {
                 StsChannel channel = (StsChannel) getCurrentObject();
                 Iterator<StsChannel> iter = getChannelGroupIterator(channel);
                 while (iter.hasNext())
-                    iter.next().display(glPanel3d, displayCenterLinePoints, displayAxes, drawFilled);
+                    iter.next().display(glPanel3d, displayCenterLinePoints, displayAxes, drawType);
             }
         }
         else
@@ -76,7 +85,7 @@ public class StsChannelClass extends StsModelObjectPanelClass implements StsSeri
             while (iter.hasNext())
             {
                 StsChannel channel = (StsChannel) iter.next();
-                channel.display(glPanel3d, displayCenterLinePoints, displayAxes, drawFilled);
+                channel.display(glPanel3d, displayCenterLinePoints, displayAxes, drawType);
             }
         }
     }
@@ -135,14 +144,14 @@ public class StsChannelClass extends StsModelObjectPanelClass implements StsSeri
         currentModel.repaintWin3d();
     }
 
-    public boolean isDrawFilled()
+    public String getDrawType()
     {
-        return drawFilled;
+        return DRAW_TYPE_STRINGS[drawType];
     }
 
-    public void setDrawFilled(boolean drawFilled)
+    public void setDrawType(String typeString)
     {
-        this.drawFilled = drawFilled;
+        this.drawType = StsParameters.getByteIndexFromString(typeString, DRAW_TYPE_STRINGS);
         displayChanged = true;
         currentModel.repaintWin3d();
     }

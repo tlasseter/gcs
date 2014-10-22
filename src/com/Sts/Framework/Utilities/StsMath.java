@@ -3109,6 +3109,7 @@ public class StsMath
     static public final class ArrayIterator implements Iterator
     {
         Object[] array;
+        boolean reverse = false;
         int length;
         Object next;
         int index;
@@ -3123,13 +3124,13 @@ public class StsMath
 
         private void setNext()
         {
-            for (; index < length; index++)
-            {
-                next = array[index];
-                return;
+                for (; index < length; index++)
+                {
+                    next = array[index];
+                    return;
+                }
+                next = null;
             }
-            next = null;
-        }
 
         public boolean hasNext()
         {
@@ -3139,7 +3140,7 @@ public class StsMath
         public Object next()
         {
             Object current = next;
-            index++;
+                index++;
             setNext();
             return current;
         }

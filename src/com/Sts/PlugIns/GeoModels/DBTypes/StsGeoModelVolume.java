@@ -4,6 +4,7 @@ import com.Sts.Framework.DBTypes.StsObjectRefList;
 import com.Sts.Framework.Interfaces.MVC.StsVolumeDisplayable;
 import com.Sts.Framework.Interfaces.StsTreeObjectI;
 import com.Sts.Framework.Interfaces.StsXYGridable;
+import com.Sts.Framework.MVC.StsModel;
 import com.Sts.Framework.MVC.Views.StsView3d;
 import com.Sts.Framework.Types.StsRotatedGridBoundingBox;
 import com.Sts.Framework.UI.Beans.*;
@@ -21,11 +22,15 @@ import java.io.Serializable;
 public class StsGeoModelVolume extends StsRotatedGridBoundingBox implements StsTreeObjectI, StsXYGridable, Serializable, Cloneable
 {
     protected StsObjectRefList channelSets;
+    /** a grid on cell centers reduced by half a grid cell on each side.  Used in grid construction. */
+    transient public StsRotatedGridBoundingBox centeredGrid;
 
     private boolean readoutEnabled = false;
 
     /** Indicates whether cube is time or depth */
     public String zDomain = StsParameters.TD_DEPTH_STRING;
+
+    static private boolean smallVolume = true;
 
     static protected StsObjectPanel objectPanel = null;
 
@@ -65,20 +70,17 @@ public class StsGeoModelVolume extends StsRotatedGridBoundingBox implements StsT
         initializeVolume();
     }
 
+    public boolean initialize(StsModel model)
+    {
+        centeredGrid = createCenteredGrid();
+        return true;
+    }
+
     public void initializeVolume()
     {
         xMin = 0;
         yMin = 0;
         zMin = 0;
-
-        xInc = 10;
-        yInc = 10;
-        zInc = 0.2f;
-
-        nRows = 1001;
-        nCols = 1001;
-        nSlices = 501;
-
         angle = 0;
 
         xOrigin = 0;
@@ -87,6 +89,28 @@ public class StsGeoModelVolume extends StsRotatedGridBoundingBox implements StsT
         colNumMin = 0;
         rowNumInc = 1;
         colNumInc = 1;
+
+        if(smallVolume)
+        {
+            xInc = 100;
+            yInc = 100;
+            zInc = 1;
+
+            nRows = 101;
+            nCols = 101;
+            nSlices = 101;
+        }
+        else
+        {
+            xInc = 10;
+            yInc = 10;
+            zInc = 0.2f;
+
+            nRows = 1001;
+            nCols = 1001;
+            nSlices = 501;
+        }
+        centeredGrid = createCenteredGrid();
     }
     public byte getZDomainSupported()
     {

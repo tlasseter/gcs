@@ -92,7 +92,7 @@ public class StsGridCrossings
         float gridColF1 = gridPoint1.jF;
 
         // if points are in same cell, return the two points
-        if((int)gridRowF1 == (int)gridRowF0 && (int)gridColF1 == (int)gridColF0)
+        if(gridCrossingPointsInSameCell(gridPoint0, gridPoint1))
         {
             gridPoints.add(gridPoint0);
             if(includeLastPoint) gridPoints.add(gridPoint1);
@@ -227,6 +227,11 @@ public class StsGridCrossings
             }
         }
         if(includeLastPoint) gridPoints.add(gridPoint1);
+    }
+
+    static public boolean gridCrossingPointsInSameCell(StsGridCrossingPoint p0, StsGridCrossingPoint p1)
+    {
+        return StsMath.floor(p0.iF) == StsMath.floor(p1.iF) && StsMath.floor(p0.jF) == StsMath.floor(p1.jF);
     }
 
 	public StsGridPoint getGridIntersection(StsXYSurfaceGridable grid)

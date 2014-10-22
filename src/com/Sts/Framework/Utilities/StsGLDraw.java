@@ -2820,11 +2820,97 @@ public class StsGLDraw
             gl.glEnd();
         }
     }
+    public static void drawQuads(GL gl, StsRotatedGridBoundingSubBox boundingBox, boolean[][] draw, float z, float[] normal, StsColor stsColor, boolean stipple)
+    {
+        int r = -1, c = -1; // rowcol coordinates relative to boundingSubBox
+        int row = -1, col = -1; // global rowcol coordinates relative to boundingBox
+        float[] p0 = new float[3];
+        float[] p1 = new float[3];
 
-    public static void drawTwoLineStrip(GL gl, StsPoint[] line0,  StsPoint[] line1, int nPoints)
+        try
+        {
+            stsColor.setGLColor(gl);
+            gl.glNormal3fv(normal, 0);
+            if(stipple)
+            {
+                gl.glEnable(GL.GL_POLYGON_STIPPLE);
+                gl.glPolygonStipple(StsGraphicParameters.halftone, 0);
+            }
+
+            float xMin = boundingBox.xMin;
+            float xInc = boundingBox.xInc;
+            float yMin = boundingBox.yMin;
+            float yInc = boundingBox.yInc;
+            int rowMin = boundingBox.rowMin;
+            int colMin = boundingBox.colMin;
+            int rowMax = boundingBox.rowMax;
+            int colMax = boundingBox.colMax;
+            // shouldn't have to do this:
+            // someone is turning off the lights and not turning them back on!!
+            // gl.glEnable(GL.GL_LIGHTING);
+            p0[2] = z;
+            p1[2] = z;
+
+            float x;
+            float y = yMin + yInc * rowMin;
+            for (row = rowMin, r = 0; row <= rowMax; row++, r++, y += yInc)
+            {
+                boolean isDrawing = false;
+                x = xMin + xInc * colMin;
+                for(col = colMin, c = 0; col <= colMax; col++, c++, x += xInc)
+                {
+                    // if we aren't drawing this quad, check if we have been drawing or not; if we are drawing this quad
+                    // check if we are currently drawing; if not start the draw for the quad strip
+                    if (!draw[r][c])
+                    {
+                        if (isDrawing) // terminate the previous quad with pair of points
+                        {
+                            isDrawing = false;
+                            gl.glVertex3f(x, y, z);
+                            gl.glVertex3f(x, y + yInc, z);
+                            gl.glEnd();
+                        }
+                    }
+                    else // we draw this quad, so if already drawing, continue; otherwise start quad strip draw
+                    {
+                        if (isDrawing) // terminate the previous quad with pair of points
+                        {
+                            gl.glVertex3f(x, y, z);
+                            gl.glVertex3f(x, y + yInc, z);
+                        }
+                        else // not currently drawing, so start drawing
+                        {
+                            isDrawing = true;
+                            gl.glBegin(GL.GL_QUAD_STRIP);
+                            gl.glVertex3f(x, y, z);
+                            gl.glVertex3f(x, y + yInc, z);
+                        }
+                    }
+                }
+                if(isDrawing)
+                {
+                    gl.glVertex3f(x, y, z);
+                    gl.glVertex3f(x, y + yInc, z);
+                    gl.glEnd();
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            StsException.outputException("StsGLDraw.drawQuads() failed." + "row: " + row + " col: " + col, e, StsException.WARNING);
+        }
+        finally
+        {
+            gl.glEnd();
+            if(stipple) gl.glDisable(GL.GL_POLYGON_STIPPLE);
+        }
+    }
+
+    public static void drawTwoLineStrip(GL gl, StsPoint[] line0,  StsPoint[] line1, int nPoints, StsColor stsColor)
     {
         try
         {
+            stsColor.setGLColor(gl);
             gl.glBegin(GL.GL_QUAD_STRIP);
             gl.glNormal3fv(verticalNormal, 0);
             for(int n = 0; n < nPoints; n++)
@@ -2843,12 +2929,13 @@ public class StsGLDraw
         }
     }
 
-    public static void drawTwoLineStippledStrip(GL gl, StsPoint[] line0,  StsPoint[] line1, int nPoints)
+    public static void drawTwoLineStippledStrip(GL gl, StsPoint[] line0,  StsPoint[] line1, int nPoints, StsColor stsColor)
     {
         try
         {
             gl.glEnable(GL.GL_POLYGON_STIPPLE);
             gl.glPolygonStipple(StsGraphicParameters.halftone, 0);
+            stsColor.setGLColor(gl);
             gl.glBegin(GL.GL_QUAD_STRIP);
             gl.glNormal3fv(verticalNormal, 0);
             for(int n = 0; n < nPoints; n++)

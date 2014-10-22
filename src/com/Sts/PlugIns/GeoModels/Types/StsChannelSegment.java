@@ -4,9 +4,13 @@ import com.Sts.Framework.DB.StsDBOutputStream;
 import com.Sts.Framework.MVC.Views.StsGLPanel3d;
 import com.Sts.Framework.Types.StsColor;
 import com.Sts.Framework.Types.StsPoint;
+import com.Sts.Framework.Types.StsRotatedGridBoundingBox;
+import com.Sts.Framework.Utilities.StsMath;
 import com.Sts.PlugIns.GeoModels.DBTypes.StsChannel;
+import com.Sts.PlugIns.GeoModels.DBTypes.StsGeoModelVolume;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 /**
  * © tom 10/8/2014
@@ -28,9 +32,18 @@ public abstract class StsChannelSegment
     /** uniform points along inner line/arc */
     StsPoint[] innerPoints = null;
 
+    StsSegmentCellGrid channelCellGrid;
+
     static final float refDirection = 90; // ref direction is North (+Y) which is a 90 deg positive ((CCW) rotation from global 0 degrees (+X)
-    static public byte LINE = 1;
-    static public byte ARC = 2;
+
+    static public final byte LINE = 1;
+    static public final byte ARC = 2;
+
+    static public final byte GRID_NONE = 0;
+    static public final byte GRID_CHANNEL = 1;
+    static public final byte GRID_POINT_BAR = 2;
+    static public final byte GRID_OVERBANK = 3;
+    static public final byte GRID_CREVASSE_SPLAY = 4;
 
     public StsChannelSegment() { }
 
@@ -42,13 +55,12 @@ public abstract class StsChannelSegment
     }
 
     public abstract boolean computePoints();
+    public abstract void display(StsGLPanel3d glPanel3d, boolean displayCenterLinePoints, byte channelsState, byte drawType, StsColor stsColor);
+    public abstract void fillSerializableArrays(int index, byte[] segmentTypes, StsPoint[] startPoints, float[] startDirections, float[] sizes, float[] arcs);
+    public abstract void buildGrids(StsGeoModelVolume geoModelVolume);
 
     public StsPoint getLastInnerPoint() { return innerPoints[innerPoints.length-1]; }
     public StsPoint getLastOuterPoint() { return outerPoints[innerPoints.length-1]; }
-
-    public abstract void display(StsGLPanel3d glPanel3d, boolean displayCenterLinePoints, boolean drawFilled, StsColor stsColor);
-
-    public abstract void fillSerializableArrays(int index, byte[] segmentTypes, StsPoint[] startPoints, float[] startDirections, float[] sizes, float[] arcs);
 
     public void writeStsPointsArray(StsDBOutputStream out, int nPoints, StsPoint[] points) throws IllegalAccessException, IOException
     {

@@ -32,7 +32,9 @@ public class StsRandomDistribGroupBox extends StsGroupBox implements StsRandomDi
     private StsIntFieldBean countBean = null;
     private StsDoubleFieldBean avgBean, devBean;
 
-    private Random random = new Random();
+    private Random random = createRandom();
+
+    static public final long randomSeed = 1;
     static private String[] typeStrings = StsRandomDistribFace.typeStrings;
 
     public StsRandomDistribGroupBox(double avg, double dev, byte type, String valueName)
@@ -46,6 +48,14 @@ public class StsRandomDistribGroupBox extends StsGroupBox implements StsRandomDi
         this.type = type;
         constructBeans();
         buildPanel();
+    }
+
+    static public Random createRandom()
+    {
+        if(randomSeed != 0)
+            return new Random(randomSeed);
+        else
+            return new Random();
     }
 
     private static double  computeLogDev(double avg, double dev)
@@ -168,7 +178,7 @@ public class StsRandomDistribGroupBox extends StsGroupBox implements StsRandomDi
         double avg = 100;
         double dev = 100;
         int[] frequency = new int[1000];
-        Random random = new Random();
+        Random random = createRandom();
 
         double logAvg = Math.log(avg);
         double logDev = computeLogDev(avg, dev);

@@ -98,13 +98,13 @@ public class StsChannelAxesPanel extends StsJPanel
         channelSet = new StsChannelSet(geoModelVolume, false);
         float zMax = geoModelVolume.getZMax();
         float zMin = geoModelVolume.getZMin();
-        int nSlices = geoModelVolume.getNSlices();
-        float zInc = geoModelVolume.getZInc();
         float ySize = geoModelVolume.getYSize();
         StsChannel channel;
 
         float z = zMax;
         /* loop over clusters until filled */
+        // don't draw 3d window until surfaces built
+        wizard.model.disableDisplay();
         while(true)
         {
             double clusterCenter = clusterDistribBox.getSample();
@@ -120,16 +120,23 @@ public class StsChannelAxesPanel extends StsJPanel
                 float channelWidthThicknessRatio = (float)widthThicknessRatioDistribBox.getSample();
                 float channelWidth = (float)channelWidthDistribBox.getSample();
                 float channelThickness = channelWidth/channelWidthThicknessRatio;
-                if(channelThickness < 0)  //hack until we put in Poisson
-                    channelThickness = 0.001f;
+
+                // bottom of first channel is at bottom of model, so top is channelThickness above that
+                // for each subsequent channel, the top is located a fraction of the thickness above the previous one
+                if(n == 0)
+                    z -= channelThickness;
+                else
+                    z -= channelThickness*channelZIncThicknessFraction;
 
                 channel = new StsChannel(channelSet, channelWidth, channelThickness, new StsPoint(x0, y0, z), new StsPoint(x1, y1, z), direction);
                 channelSet.addChannel(channel);
-                z -= channelThickness*channelZIncThicknessFraction;
+
                 if (z < zMin)
                 {
                     addToProjectAndModel(channelSet);
                     channelSet.setChannelsState(StsChannelSet.CHANNELS_AXES);
+                    wizard.model.enableDisplay();
+                    wizard.enableNext();
                     return;
                 }
             }

@@ -3,10 +3,14 @@ package com.Sts.PlugIns.GeoModels.Types;
 import com.Sts.Framework.MVC.Views.StsGLPanel3d;
 import com.Sts.Framework.Types.StsColor;
 import com.Sts.Framework.Types.StsPoint;
+import com.Sts.Framework.Types.StsRotatedGridBoundingBox;
 import com.Sts.Framework.Utilities.StsException;
 import com.Sts.Framework.Utilities.StsGLDraw;
 import com.Sts.Framework.Utilities.StsMath;
 import com.Sts.PlugIns.GeoModels.DBTypes.StsChannel;
+import com.Sts.PlugIns.GeoModels.DBTypes.StsChannelClass;
+import com.Sts.PlugIns.GeoModels.DBTypes.StsChannelSet;
+import com.Sts.PlugIns.GeoModels.DBTypes.StsGeoModelVolume;
 
 import javax.media.opengl.GL;
 
@@ -26,6 +30,8 @@ public class StsChannelArcSegment extends StsChannelSegment
     /** uniformly sampled straight line between first and last arc lines: base of point bar.
      *  this will be gridded with innerRadius points to make point bar.  */
     StsPoint[] basePoints = null;
+
+    StsSegmentCellGrid pointBarCellGrid;
 
     static final float dArc = 10;
 
@@ -155,23 +161,36 @@ public class StsChannelArcSegment extends StsChannelSegment
         return angle >= refAngle;
     }
 
-    public void display(StsGLPanel3d glPanel3d, boolean displayCenterLinePoints, boolean drawFilled, StsColor stsColor)
+    public void display(StsGLPanel3d glPanel3d, boolean displayCenterLinePoints, byte channelsState, byte drawType, StsColor stsColor)
     {
         GL gl = glPanel3d.getGL();
 
         if (gl == null || centerLinePoints == null) return;
 
-        StsGLDraw.drawLine(gl, stsColor, true, centerLinePoints);
-        if (displayCenterLinePoints)
+        // always draw the channel centerLine (straight axis initially)
+        // optionally draw the centerLine points
+        if(channelsState >= StsChannelSet.CHANNELS_AXES)
         {
-            glPanel3d.setViewShift(gl, 1.0f);
-            StsGLDraw.drawPoint(gl, centerLinePoints[0].v, StsColor.WHITE, 6);
-            glPanel3d.resetViewShift(gl);
+            StsGLDraw.drawLine(gl, stsColor, true, centerLinePoints);
+            if (displayCenterLinePoints)
+            {
+                glPanel3d.setViewShift(gl, 1.0f);
+                StsGLDraw.drawPoint(gl, centerLinePoints[0].v, StsColor.WHITE, 6);
+                glPanel3d.resetViewShift(gl);
+            }
         }
-        if(!drawFilled) return;
-        // draw filled channels and point-bars
-        StsGLDraw.drawTwoLineStrip(gl, innerPoints, outerPoints, innerPoints.length);
-        StsGLDraw.drawTwoLineStippledStrip(gl, basePoints, innerPoints, innerPoints.length);
+        // if we have channel arcs or grids constructed we can draw one or the other depending on selections
+        if(drawType == StsChannelClass.DRAW_FILLED && channelsState >= StsChannelSet.CHANNELS_ARCS)
+        {
+            // draw filled channels and point-bars
+            StsGLDraw.drawTwoLineStrip(gl, innerPoints, outerPoints, innerPoints.length, stsColor);
+            StsGLDraw.drawTwoLineStippledStrip(gl, basePoints, innerPoints, innerPoints.length, stsColor);
+        }
+        else if(drawType == StsChannelClass.DRAW_GRID && channelsState == StsChannelSet.CHANNELS_GRIDS)
+        {
+            channelCellGrid.display(gl, stsColor, false);
+            pointBarCellGrid.display(gl, stsColor, true);
+        }
     }
 
     public void fillSerializableArrays(int index, byte[] segmentTypes, StsPoint[] startPoints, float[] startDirections, float[] sizes, float[] arcs)
@@ -186,5 +205,11 @@ public class StsChannelArcSegment extends StsChannelSegment
     public StsPoint getLastPoint()
     {
         return StsPoint.getLastPoint(centerLinePoints);
+    }
+
+    public void buildGrids(StsGeoModelVolume geoModelVolume)
+    {
+        channelCellGrid = new StsSegmentCellGrid(outerPoints, innerPoints, geoModelVolume, startPoint.getZ());
+        pointBarCellGrid = new StsSegmentCellGrid(innerPoints, basePoints, geoModelVolume, startPoint.getZ());
     }
 }

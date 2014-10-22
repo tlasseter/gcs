@@ -343,8 +343,8 @@ public class StsBlockGrid extends StsRotatedGridBoundingSubBox implements Clonea
 
     // Accessors
     public float getAngle() { return angle; }
-    public int getNRows() { return nRows; }
-    public int getNCols() { return nCols; }
+    public int getNSubRows() { return nRows; }
+    public int getNSubCols() { return nCols; }
 //    public float getXInc() { return xInc; }
 //    public float getYInc() { return yInc; }
     public float getZMin() { return getZMin(); }
