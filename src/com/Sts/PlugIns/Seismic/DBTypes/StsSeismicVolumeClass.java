@@ -21,7 +21,7 @@ import com.Sts.PlugIns.Seismic.UI.*;
 import com.Sts.PlugIns.Seismic.Views.*;
 
 public class StsSeismicVolumeClass extends StsSeismicClass implements StsSerializable, StsClassSurfaceDisplayable,
-		StsClassCursor3dTextureDisplayable,StsClassDisplayable, StsClassObjectSelectable // , StsClassDisplayable
+		StsClassCursor3dTextureDisplayable, StsClassDisplayable, StsClassObjectSelectable // , StsClassDisplayable
 {
 	protected boolean displayGridLines = false;
 	protected boolean displayVoxels = false;

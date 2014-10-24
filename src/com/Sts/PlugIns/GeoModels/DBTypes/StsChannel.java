@@ -11,13 +11,11 @@ import com.Sts.Framework.MVC.Views.StsGLPanel3d;
 import com.Sts.Framework.MVC.Views.StsView3d;
 import com.Sts.Framework.Types.StsColor;
 import com.Sts.Framework.Types.StsPoint;
-import com.Sts.Framework.Types.StsRotatedGridBoundingBox;
 import com.Sts.Framework.Types.StsRotatedGridBoundingSubBox;
 import com.Sts.Framework.UI.Beans.*;
 import com.Sts.Framework.UI.ObjectPanel.StsObjectPanel;
 import com.Sts.Framework.UI.StsMessageFiles;
 import com.Sts.Framework.Utilities.StsGLDraw;
-import com.Sts.Framework.Utilities.StsMath;
 import com.Sts.PlugIns.GeoModels.Types.StsChannelArcSegment;
 import com.Sts.PlugIns.GeoModels.Types.StsChannelLineSegment;
 import com.Sts.PlugIns.GeoModels.Types.StsChannelSegment;
@@ -53,8 +51,8 @@ public class StsChannel extends StsRotatedGridBoundingSubBox implements StsTreeO
     private boolean readoutEnabled = false;
     static protected StsObjectPanel objectPanel = null;
 
-    /** these are colors used in drawing line; actual color is defined by nColor */
-    static public StsColor[] colorList = StsColor.greyPluscolors32;
+    /** these are colors used in drawing channels; color selected is defined by nColor.  -1 is null */
+    static public StsColor[] colorList = StsColor.colors32NoGrey;
 
     static public final StsFieldBean[] displayFields =
     {
@@ -108,6 +106,12 @@ public class StsChannel extends StsRotatedGridBoundingSubBox implements StsTreeO
         return true;
     }
 
+    public void display(StsGLPanel3d glPanel3d, boolean displayCenterLinePoints, boolean displayAxes, byte drawType, int zPlane)
+    {
+        if(subBoxContainsSlice(zPlane))
+            display(glPanel3d, displayCenterLinePoints, displayAxes, drawType);
+    }
+
     public void display(StsGLPanel3d glPanel3d, boolean displayCenterLinePoints, boolean displayAxes, byte drawType)
     {
         GL gl = glPanel3d.getGL();
@@ -117,7 +121,7 @@ public class StsChannel extends StsRotatedGridBoundingSubBox implements StsTreeO
         {
             StsGLDraw.drawLine(gl, stsColor, true, new StsPoint[] { startPoint, endPoint});
         }
-        else if(channelsState == StsChannelSet.CHANNELS_ARCS || channelsState == StsChannelSet.CHANNELS_GRIDS)
+        else if(channelsState == StsChannelSet.CHANNELS_ARCS) // || channelsState == StsChannelSet.CHANNELS_GRIDS)
         {
             if (!currentModel.useDisplayLists && usingDisplayLists)
             {
@@ -154,6 +158,22 @@ public class StsChannel extends StsRotatedGridBoundingSubBox implements StsTreeO
         for (StsChannelSegment channelSegment : channelSegments)
             channelSegment.display(glPanel3d, displayCenterLinePoints, channelsState, drawType, stsColor);
     }
+
+    public void fillData(byte[] byteData)
+    {
+        if(channelSegments == null) return;
+        int channelIndex = getIndex();
+        for(StsChannelSegment channelSegment : channelSegments)
+            channelSegment.fillData(byteData, channelIndex);
+    }
+
+    public void fillData(byte[] byteData, int dir, int nPlane)
+    {
+        if(channelSegments == null) return;
+        for(StsChannelSegment channelSegment : channelSegments)
+            channelSegment.fillData(byteData, dir, nPlane, this);
+    }
+
 
     public void deleteDisplayLists(GL gl)
     {

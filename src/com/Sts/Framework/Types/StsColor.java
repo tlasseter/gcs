@@ -52,6 +52,7 @@ public class StsColor extends StsSerialize implements Cloneable, Serializable
     static public final StsColor DARK_YELLOW = new StsColor(0.65f, 0.65f, 0.0f);
     static public final StsColor DARK_MAGENTA = new StsColor(0.65f, 0.0f, 0.65f);
     static public final StsColor DARK_CYAN = new StsColor(0.0f, 0.65f, 0.65f);
+    // Blues
     static public final StsColor ALICEBLUE = new StsColor(240, 248, 255);
     static public final StsColor BLUEVIOLET = new StsColor(138, 43, 226);
     static public final StsColor CADETBLUE = new StsColor(95, 159, 159);
@@ -211,9 +212,9 @@ public class StsColor extends StsSerialize implements Cloneable, Serializable
             DARKOLIVE, BRONZE, BROWN, PURPLE, ORANGE, GRAY, BRASS, DARK_RED, DARK_GREEN, DARK_BLUE, DARK_YELLOW, PINK, DARK_MAGENTA,
             MAROON, DARK_CYAN, FUCHSIA, COPPER, DARKPURPLE, DARK_GRAY, YELLOWGREEN, BLACK, WHITE, GREY };
 
-    static public final StsColor[] greyPluscolors32 = {GREY, RED, GREEN, BLUE, YELLOW, DARKKHAKI, MAGENTA, CYAN, LIGHTOLIVE, CORAL,
-            DARKOLIVE, BRONZE, BROWN, PURPLE, ORANGE, GRAY, BRASS, CORAL, DARK_RED, DARK_GREEN, DARK_BLUE, DARK_YELLOW, PINK, DARK_MAGENTA,
-            MAROON, DARK_CYAN, FUCHSIA, COPPER, DARKPURPLE, DARK_GRAY, YELLOWGREEN, LIGHTCORAL};
+    static public final StsColor[] colors32NoGrey = { RED, GREEN, BLUE, YELLOW, DARKKHAKI, MAGENTA, CYAN, LIGHTOLIVE, CORAL,
+            DARKOLIVE, BRONZE, BROWN, PURPLE, ORANGE, BRASS, CORAL, DARK_RED, DARK_GREEN, DARK_BLUE, DARK_YELLOW, PINK, DARK_MAGENTA,
+            MAROON, DARK_CYAN, FUCHSIA, COPPER, DARKPURPLE, YELLOWGREEN, LIGHTCORAL, HOTPINK, LIMEGREEN, CADETBLUE};
 
     static public final String[] bkgdColorNames = {"BLACK","DARK_GREY","LIGHT_GREY","WHITE","KHAKI","COPPER","BRONZE","BRASS","SILVER"};
     static public final StsColor[] bkgdColors = {BLACK,DARK_GREY,LIGHT_GREY,WHITE,DARKKHAKI,COPPER,BRONZE,BRASS,SILVER};

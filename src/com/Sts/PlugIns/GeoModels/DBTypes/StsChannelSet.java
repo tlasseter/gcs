@@ -1,16 +1,14 @@
 package com.Sts.PlugIns.GeoModels.DBTypes;
 
-import com.Sts.Framework.DBTypes.StsMainObject;
 import com.Sts.Framework.DBTypes.StsObjectRefList;
 import com.Sts.Framework.Interfaces.StsTreeObjectI;
-import com.Sts.Framework.Interfaces.StsXYGridable;
+import com.Sts.Framework.MVC.Views.StsCursor3d;
 import com.Sts.Framework.MVC.Views.StsView3d;
 import com.Sts.Framework.Types.StsRotatedGridBoundingBox;
 import com.Sts.Framework.UI.Beans.*;
 import com.Sts.Framework.UI.ObjectPanel.StsObjectPanel;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 
 /**
  * © tom 9/30/2014
@@ -113,5 +111,36 @@ public class StsChannelSet extends StsRotatedGridBoundingBox implements StsTreeO
     public void setGeoModelVolume(StsGeoModelVolume geoModelVolume)
     {
         this.geoModelVolume = geoModelVolume;
+    }
+
+    public void fillData(byte[] byteData, int dir, int nPlane)
+    {
+        StsChannel[] channelList = (StsChannel[]) channels.getCastList();
+        StsChannel channel;
+
+        if(dir == StsCursor3d.ZDIR)
+        {
+            for (int n = 0; n < channelList.length; n++)
+            {
+                channel = channelList[n];
+                if (channel.subBoxContainsSlice(nPlane))
+                {
+                    channel.fillData(byteData);
+                    n++;
+                    for (; n < channelList.length; n++)
+                    {
+                        channel = channelList[n];
+                        if (!channel.subBoxContainsSlice(nPlane)) return;
+                        channel.fillData(byteData);
+                    }
+                }
+            }
+        }
+        else // for XDIR and YDIR planes, let StsChannel handle the  vertical intersections with segments
+        {
+            for (int n = 0; n < channelList.length; n++)
+                channelList[n].fillData(byteData, dir, nPlane);
+        }
+
     }
 }

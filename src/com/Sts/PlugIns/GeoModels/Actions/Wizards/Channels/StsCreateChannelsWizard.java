@@ -17,7 +17,6 @@ import com.Sts.PlugIns.GeoModels.DBTypes.StsGeoModelVolume;
 public class StsCreateChannelsWizard extends StsWizard
 {
     String volName = "geoVolumeName";
-    private StsGeoModelVolume geoModelVolume = new StsGeoModelVolume(false);
     public StsChannelsAxesStep channelAxes = new StsChannelsAxesStep(this);
     public StsChannelGeometryStep channelGeometry = new StsChannelGeometryStep(this);
 

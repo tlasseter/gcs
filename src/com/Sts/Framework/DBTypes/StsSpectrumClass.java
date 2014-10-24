@@ -41,7 +41,7 @@ public class StsSpectrumClass extends StsClass implements StsSerializable
         new StsColor(254, 0, 0, 255, 255)
     };
 
-    static StsColor[] defaultPropertySpectrumColors = new StsColor[]
+    static public StsColor[] defaultPropertySpectrumColors = new StsColor[]
     {
         new StsColor(0, 255, 0, 0, 255),
         new StsColor(128, 0, 0, 0, 255),
@@ -98,9 +98,10 @@ public class StsSpectrumClass extends StsClass implements StsSerializable
        new StsColor(254, 0, 0, 255, 255)
  */
     };
+    // autoCad colors without black and white
     static StsColor[] autoCADSpectrumColors = new StsColor[]
               {
-		new StsColor(0,0,0,0, 255),
+		// new StsColor(0,0,0,0, 255),   // moved to end
 		new StsColor(1, 255,0,0, 255),
 		new StsColor(2, 255,255,0, 255),
 		new StsColor(3, 0,255,0, 255),
@@ -354,7 +355,9 @@ public class StsSpectrumClass extends StsClass implements StsSerializable
     			new StsColor(252, 105,105,105, 255),
     			new StsColor(253, 130,130,130, 255),
     			new StsColor(254, 190, 190, 190, 255),
-    			new StsColor(255, 255, 255, 255, 255),    			
+                new StsColor(0,0,0,0, 255),
+    			new StsColor(255, 255, 255, 255, 255),
+                new StsColor(0,0,0,0, 255),   // padded with black which will be ignored and replaced with null
               };
 
     static public final String SPECTRUM_RWB = "RedWhiteBlue";

@@ -58,6 +58,8 @@ public abstract class StsChannelSegment
     public abstract void display(StsGLPanel3d glPanel3d, boolean displayCenterLinePoints, byte channelsState, byte drawType, StsColor stsColor);
     public abstract void fillSerializableArrays(int index, byte[] segmentTypes, StsPoint[] startPoints, float[] startDirections, float[] sizes, float[] arcs);
     public abstract void buildGrids(StsGeoModelVolume geoModelVolume);
+    public abstract void fillData(byte[] byteData, int nChannel);
+    public abstract void fillData(byte[] byteData, int dir, int nSlice, StsChannel channel);
 
     public StsPoint getLastInnerPoint() { return innerPoints[innerPoints.length-1]; }
     public StsPoint getLastOuterPoint() { return outerPoints[innerPoints.length-1]; }

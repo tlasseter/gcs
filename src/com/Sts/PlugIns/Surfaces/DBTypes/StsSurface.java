@@ -6313,7 +6313,7 @@ public class StsSurface extends StsRotatedGridBoundingBox implements StsSelectab
         //           shader = StsJOGLShader.ARB_TLUT_WITH_SPECULAR_LIGHTS;
         if (textureTiles != null && textureTiles.isSameSize(this) && !shaderChanged()) return true;
         if (textureTiles != null) deleteTexturesAndDisplayLists(gl);
-        textureTiles = StsTextureTiles.constructor(currentModel, this, StsParameters.ZDIR, this, isPixelMode, subVolume);
+        textureTiles = StsTextureTiles.constructor(currentModel, this, StsParameters.ZDIR, this, isPixelMode, subVolume, false);
         if (textureTiles == null) return false;
         return true;
     }

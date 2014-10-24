@@ -26,6 +26,7 @@ public class StsTextureTile
     public double minRowTexCoor, minColTexCoor;
     public double maxRowTexCoor, maxColTexCoor;
     public double dRowTexCoor, dColTexCoor;
+    boolean cellCenteredTexture = false;
     public double[][] xyzPlane = new double[4][];
     int texture = 0;
     ByteBuffer tileData;
@@ -42,7 +43,7 @@ public class StsTextureTile
     static private StsTimer timer = null;
     static public boolean debug = false;
 
-    public StsTextureTile(int nTotalRows, int nTotalCols, int row, int col, StsTextureTiles textureTiles, int maxTextureSize, int nTile)
+    public StsTextureTile(int nTotalRows, int nTotalCols, int row, int col, StsTextureTiles textureTiles, int maxTextureSize, boolean cellCenteredTexture, int nTile)
     {
         this.nTotalRows = nTotalRows;
         this.nTotalCols = nTotalCols;
@@ -51,6 +52,7 @@ public class StsTextureTile
         this.colMin = col;
         this.nTile = nTile;
         this.textureTiles = textureTiles;
+        this.cellCenteredTexture = cellCenteredTexture;
 
         if(runTimer && timer == null) timer = new StsTimer();
 
@@ -65,8 +67,13 @@ public class StsTextureTile
         nBackgroundRows = StsMath.nextBaseTwoInt(nRows);
         nBackgroundCols = StsMath.nextBaseTwoInt(nCols);
 
-        double rowBorder = 1.0 / (2.0 * nBackgroundRows);
-        double colBorder = 1.0 / (2.0 * nBackgroundCols);
+        double rowBorder = 0;
+        double colBorder = 0;
+        if(!cellCenteredTexture)
+        {
+            rowBorder = 1.0 / (2.0 * nBackgroundRows);
+            colBorder = 1.0 / (2.0 * nBackgroundCols);
+        }
 
         minRowTexCoor = rowBorder;
         minColTexCoor = colBorder;
@@ -173,8 +180,13 @@ public class StsTextureTile
         nBackgroundRows = StsMath.nextBaseTwoInt(nRows);
         nBackgroundCols = StsMath.nextBaseTwoInt(nCols);
 
-        double rowBorder = 1.0 / (2.0 * nBackgroundRows);
-        double colBorder = 1.0 / (2.0 * nBackgroundCols);
+        double rowBorder = 0;
+        double colBorder = 0;
+        if(cellCenteredTexture)
+        {
+            rowBorder = 1.0 / (2.0 * nBackgroundRows);
+            colBorder = 1.0 / (2.0 * nBackgroundCols);
+        }
 
         minRowTexCoor = rowBorder;
         minColTexCoor = colBorder;
@@ -815,8 +827,13 @@ public class StsTextureTile
 
     public void adjust(int cropRowMin, int cropRowMax, int cropColMin, int cropColMax)
     {
-        double rowBorder = 1.0 / (2.0 * nBackgroundRows);
-        double colBorder = 1.0 / (2.0 * nBackgroundCols);
+        double rowBorder = 0;
+        double colBorder = 0;
+        if(!cellCenteredTexture)
+        {
+            rowBorder = 1.0 / (2.0 * nBackgroundRows);
+            colBorder = 1.0 / (2.0 * nBackgroundCols);
+        }
 
         croppedRowMin = StsMath.minMax(cropRowMin, rowMin, rowMax);
         croppedRowMax = StsMath.minMax(cropRowMax, rowMin, rowMax);

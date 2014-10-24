@@ -203,7 +203,7 @@ public class StsSeismicCursorSection extends StsCursor3dVolumeTexture
         if (textureTiles == null)
         {
             StsCropVolume subVolume = glPanel3d.model.getProject().getCropVolume();
-            textureTiles = StsTextureTiles.constructor(model, this, dirNo, seismicVolume, isPixelMode, subVolume);
+            textureTiles = StsTextureTiles.constructor(model, this, dirNo, seismicVolume, isPixelMode, subVolume, false);
             if (textureTiles == null) return false;
             nTextureRows = textureTiles.nTotalRows;
             nTextureCols = textureTiles.nTotalCols;
@@ -212,7 +212,7 @@ public class StsSeismicCursorSection extends StsCursor3dVolumeTexture
         }
         else if (!textureTiles.isSameSize(seismicVolume))
         {
-            textureTiles.constructTiles(seismicVolume);
+            textureTiles.constructTiles(seismicVolume, true);
             nTextureRows = textureTiles.nTotalRows;
             nTextureCols = textureTiles.nTotalCols;
             textureChanged = true;

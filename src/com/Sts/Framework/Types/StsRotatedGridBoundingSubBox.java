@@ -374,6 +374,7 @@ public class StsRotatedGridBoundingSubBox extends StsRotatedGridBoundingBox impl
             return 0;
         }
     }
+
 	public float getCursorRowMinCoor(int dir)
 	{
 		if (dir == XDIR) return getRowMinCoor();
@@ -406,6 +407,17 @@ public class StsRotatedGridBoundingSubBox extends StsRotatedGridBoundingBox impl
 		else return 0;
 	}
 
+    public int getCursorIndexFromRowColSlice(int dir, int row, int col, int slice)
+    {
+        if (dir == XDIR)
+            return row*nSlices + slice;
+        else if (dir == YDIR)
+            return col*nSlices + slice;
+        else if (dir == ZDIR)
+            return row*nCols + col;
+        else
+            return 0;
+    }
 	public float getRowMinCoor()
 	{
 		return getYCoor(rowMin);
@@ -960,8 +972,14 @@ public class StsRotatedGridBoundingSubBox extends StsRotatedGridBoundingBox impl
 
     public int getRowMin() { return rowMin; }
     public int getColMin() { return colMin; }
+    public int getSliceMin() { return sliceMin; }
+
     public int getRowMax() { return rowMax; }
     public int getColMax() { return colMax; }
+
+    public int getSliceMax() { return sliceMax; }
+
+
     public float getXInc() { return xInc; }
     public float getYInc() { return yInc; }
 
@@ -1004,6 +1022,19 @@ public class StsRotatedGridBoundingSubBox extends StsRotatedGridBoundingBox impl
     public Grid2dIterator getGrid2dIterator(StsGrid2dIterable grid2d)
     {
         return new Grid2dIterator(grid2d);
+    }
+
+    public boolean subBoxContainsSlice(int nSlice)
+    {
+        return nSlice >= sliceMin && nSlice <= sliceMax;
+    }
+    public boolean subBoxContainsRow(int row)
+    {
+        return row >= rowMin && row <= rowMax;
+    }
+    public boolean subBoxContainsCol(int col)
+    {
+        return col >= colMin && col <= colMax;
     }
 
     public class Grid2dIterator<E> implements Iterator<E>

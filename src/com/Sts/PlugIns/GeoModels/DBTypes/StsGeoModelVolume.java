@@ -1,6 +1,6 @@
 package com.Sts.PlugIns.GeoModels.DBTypes;
 
-import com.Sts.Framework.DBTypes.StsObjectRefList;
+import com.Sts.Framework.DBTypes.*;
 import com.Sts.Framework.Interfaces.MVC.StsVolumeDisplayable;
 import com.Sts.Framework.Interfaces.StsTreeObjectI;
 import com.Sts.Framework.Interfaces.StsXYGridable;
@@ -10,27 +10,42 @@ import com.Sts.Framework.Types.StsRotatedGridBoundingBox;
 import com.Sts.Framework.UI.Beans.*;
 import com.Sts.Framework.UI.ObjectPanel.StsObjectPanel;
 import com.Sts.Framework.UI.StsMessage;
+import com.Sts.Framework.Utilities.DataCube.StsBlocksMemoryManager;
+import com.Sts.Framework.Utilities.DataCube.StsCubeFileBlocks;
+import com.Sts.Framework.Utilities.StsException;
+import com.Sts.Framework.Utilities.StsMath;
 import com.Sts.Framework.Utilities.StsParameters;
 
+import javax.media.opengl.GL;
 import java.io.Serializable;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 /**
  * © tom 9/27/2014
  * All Rights Reserved
  * No part of this website or any of its contents may be reproduced, copied, modified or adapted, without the prior written consent of the author, unless otherwise indicated for stand-alone materials.
  */
-public class StsGeoModelVolume extends StsRotatedGridBoundingBox implements StsTreeObjectI, StsXYGridable, Serializable, Cloneable
+public class StsGeoModelVolume extends StsRotatedGridBoundingBox implements StsTreeObjectI, StsXYGridable, StsVolumeDisplayable, Serializable, Cloneable
 {
     protected StsObjectRefList channelSets;
+    /** The current colorscale viewed on the object panel */
+    protected StsColorscale colorscale;
     /** a grid on cell centers reduced by half a grid cell on each side.  Used in grid construction. */
     transient public StsRotatedGridBoundingBox centeredGrid;
+
+    transient StsBlocksMemoryManager blocksMemory = null;
+    transient public StsCubeFileBlocks[] filesMapBlocks;
+    transient public StsCubeFileBlocks fileMapRowFloatBlocks;
+
+    transient public StsColorList geoVolumeColorList = null;
 
     private boolean readoutEnabled = false;
 
     /** Indicates whether cube is time or depth */
     public String zDomain = StsParameters.TD_DEPTH_STRING;
 
-    static private boolean smallVolume = true;
+    static private boolean smallVolume = false;
 
     static protected StsObjectPanel objectPanel = null;
 
@@ -64,6 +79,7 @@ public class StsGeoModelVolume extends StsRotatedGridBoundingBox implements StsT
     };
 
     public StsGeoModelVolume() { }
+
     public StsGeoModelVolume(boolean persistent)
     {
         super(persistent);
@@ -73,6 +89,7 @@ public class StsGeoModelVolume extends StsRotatedGridBoundingBox implements StsT
     public boolean initialize(StsModel model)
     {
         centeredGrid = createCenteredGrid();
+        initializeColorscale();
         return true;
     }
 
@@ -92,13 +109,13 @@ public class StsGeoModelVolume extends StsRotatedGridBoundingBox implements StsT
 
         if(smallVolume)
         {
-            xInc = 100;
+            xInc = 200;
             yInc = 100;
-            zInc = 1;
+            zInc = 4;
 
             nRows = 101;
-            nCols = 101;
-            nSlices = 101;
+            nCols = 51;
+            nSlices = 26;
         }
         else
         {
@@ -111,10 +128,29 @@ public class StsGeoModelVolume extends StsRotatedGridBoundingBox implements StsT
             nSlices = 501;
         }
         centeredGrid = createCenteredGrid();
+        initializeColorscale();
     }
+
     public byte getZDomainSupported()
     {
         return StsParameters.getZDomainFromString(zDomain);
+    }
+
+    public byte getZDomain()
+    {
+        return StsParameters.getZDomainFromString(zDomain);
+    }
+
+    public boolean canDisplayZDomain()
+    {
+        StsProject project = currentModel.getProject();
+        return project.canDisplayZDomain(getZDomain()) || project.hasVelocityModel();
+    }
+
+    public void addChannelSet(StsChannelSet channelSet)
+    {
+        if(channelSets == null) channelSets = StsObjectRefList.constructor(1, 1, "channelSets", this, true);
+        channelSets.add(channelSet);
     }
 
     public boolean checkGrid()
@@ -216,7 +252,7 @@ public class StsGeoModelVolume extends StsRotatedGridBoundingBox implements StsT
         currentModel.win3dDisplayAll();
     }
 
-    public boolean isReadoutEnabled()
+    public boolean getReadoutEnabled()
     {
         return readoutEnabled;
     }
@@ -224,5 +260,130 @@ public class StsGeoModelVolume extends StsRotatedGridBoundingBox implements StsT
     public void setReadoutEnabled(boolean readoutEnabled)
     {
         this.readoutEnabled = readoutEnabled;
+    }
+
+    // to be implemented
+    public int getPlaneValue(int dir, float[] xyz)
+    {
+        int row = -1, col = -1, slice = -1;
+        byte signedByteValue;
+        byte[] planeData;
+        try
+        {
+            row = getNearestBoundedRowCoor(xyz[1]);
+            col = getNearestBoundedColCoor(xyz[0]);
+            slice = getNearestBoundedSliceCoor(xyz[2]);
+            signedByteValue = -1;
+//            signedByteValue = filesMapBlocks[YDIR].readByteValue(row, col, slice);
+            return StsMath.signedByteToUnsignedInt(signedByteValue);
+        }
+        catch (Exception e)
+        {
+            StsException.systemError(
+                    "StsSeismicVolume.getPlaneValue() failed for row " + row +
+                            " col " + col +
+                            " slice " +
+                            slice);
+            return 0;
+        }
+    }
+    public String getUnits()
+    {
+        return "";
+    }
+
+    public StsGeoModelVolumeClass getGeoModelVolumeClass()
+    {
+        return (StsGeoModelVolumeClass) currentModel.getCreateStsClass(getClass());
+    }
+
+    public ByteBuffer readByteBufferPlane(int dir, float dirCoordinate)
+    {
+        try
+        {
+            if(channelSets == null) return null;
+
+            int nPlane = this.getCursorPlaneIndex(dir, dirCoordinate);
+            if (nPlane == -1) return null;
+            int nBytes = getNSamplesInPlane(dir);
+            byte[] byteData = new byte[nBytes];
+            Arrays.fill(byteData, (byte)-1);
+            StsChannelSet[] channelSetList = (StsChannelSet[])channelSets.getCastList(StsChannelSet.class);
+            for(StsChannelSet channelSet : channelSetList)
+                channelSet.fillData(byteData, dir, nPlane);
+            ByteBuffer byteBuffer = ByteBuffer.wrap(byteData);
+            return checkInterpolateUserNull(dir, nPlane, byteBuffer);
+        }
+        catch (Exception e)
+        {
+            StsException.outputException("StsSeismicVolume.readPlaneData() failed.", e, StsException.WARNING);
+            return null;
+        }
+    }
+
+    private ByteBuffer checkInterpolateUserNull(int dir, int nPlane, ByteBuffer byteBuffer)
+    {
+        boolean fillPlaneNulls = getGeoModelVolumeClass().getFillPlaneNulls();
+        if (!fillPlaneNulls) return byteBuffer;
+        //StsVolumeInterpolation volumeInterpolator = StsVolumeInterpolation.getInstance(this);
+        //return volumeInterpolator.interpolatePlane(dir, nPlane, byteBuffer);
+        return null;
+    }
+
+    public boolean setGLColorList(GL gl, boolean nullsFilled, int dir, int shader)
+    {
+        /*
+        if (dir == ZDIR && currentAttribute != null && currentAttribute != nullAttribute)
+            return currentAttribute.setGLColorList(gl, nullsFilled, shader);
+        else if
+        */
+        if (geoVolumeColorList != null)
+            return geoVolumeColorList.setGLColorList(gl, nullsFilled, shader);
+        else
+            return false;
+    }
+
+    public void initializeColorscale()
+    {
+        try
+        {
+            if (colorscale == null)
+            {
+                StsSpectrumClass spectrumClass = currentModel.getSpectrumClass();
+                colorscale = new StsColorscale("Test", spectrumClass.getSpectrum(spectrumClass.SPECTRUM_AUTOCAD), 0, 255);
+                colorscale.setEditRange(0, 255);
+            }
+            geoVolumeColorList = new StsColorList(colorscale);
+            colorscale.addActionListener(this);
+        }
+        catch (Exception e)
+        {
+            StsException.outputException("StsSeismicVolume.initializeColorscale() failed.", e, StsException.WARNING);
+        }
+    }
+
+    public byte[] readBytePlaneData(int dir, float dirCoordinate)
+    {
+        try
+        {
+            int nPlane = this.getCursorPlaneIndex(dir, dirCoordinate);
+            if (nPlane == -1) return null;
+            int nBytes = getNSamplesInPlane(dir);
+            byte[] byteData = new byte[nBytes];
+            for(int n = 0; n < nBytes; n++)
+                byteData[n] = (byte)n;
+            return byteData;
+            //return filesMapBlocks[dir].readBytePlane(nPlane);
+        }
+        catch (Exception e)
+        {
+            StsException.outputException("StsSeismicVolume.readPlaneData() failed.", e, StsException.WARNING);
+            return null;
+        }
+    }
+
+    public final boolean isByteValueNull(byte byteValue)
+    {
+        return byteValue == -1;
     }
 }

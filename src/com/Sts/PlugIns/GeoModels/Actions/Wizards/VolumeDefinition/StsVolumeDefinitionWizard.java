@@ -70,13 +70,9 @@ public class StsVolumeDefinitionWizard extends StsWizard
     public boolean buildVolume(StsProgressPanel ppanel) {
         return true;
     }
-    public StsGeoModelVolume getGeoModelVolume() {
-        return defineVolume.panel.getGeoModelVolume();
-    }
 
     public boolean checkGrid()
     {
-        StsGeoModelVolume geoModelVolume = getGeoModelVolume();
         boolean gridOK = geoModelVolume.checkGrid();
         if(!gridOK) return false;
         return addToProjectAndModel(geoModelVolume);
@@ -90,8 +86,8 @@ public class StsVolumeDefinitionWizard extends StsWizard
             new StsMessage(null, StsMessage.WARNING, "Failed to add bounding box to project.");
             return false;
         }
-        project.initializeViews();
         geoModelVolume.addToModel();
+        project.initializeViews();
         return true;
     }
 }

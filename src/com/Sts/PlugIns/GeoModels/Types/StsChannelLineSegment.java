@@ -3,7 +3,6 @@ package com.Sts.PlugIns.GeoModels.Types;
 import com.Sts.Framework.MVC.Views.StsGLPanel3d;
 import com.Sts.Framework.Types.StsColor;
 import com.Sts.Framework.Types.StsPoint;
-import com.Sts.Framework.Types.StsRotatedGridBoundingBox;
 import com.Sts.Framework.Utilities.StsGLDraw;
 import com.Sts.PlugIns.GeoModels.DBTypes.StsChannel;
 import com.Sts.PlugIns.GeoModels.DBTypes.StsChannelClass;
@@ -68,6 +67,17 @@ public class StsChannelLineSegment extends StsChannelSegment
         {
             channelCellGrid.display(gl, stsColor, false);
         }
+    }
+
+    public void fillData(byte[] byteData, int nChannel)
+    {
+        this.channelCellGrid.fillData(byteData, nChannel);
+    }
+
+
+    public void fillData(byte[] byteData, int dir, int nPlane, StsChannel channel)
+    {
+        channelCellGrid.fillData(byteData, dir, nPlane, channel);
     }
 
     public void fillSerializableArrays(int index, byte[] segmentTypes, StsPoint[] startPoints, float[] startDirections, float[] sizes, float[] arcs)

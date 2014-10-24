@@ -95,7 +95,8 @@ public class StsChannelAxesPanel extends StsJPanel
 
     public void build()
     {
-        channelSet = new StsChannelSet(geoModelVolume, false);
+        channelSet = new StsChannelSet(geoModelVolume, true);
+        geoModelVolume.addChannelSet(channelSet);
         float zMax = geoModelVolume.getZMax();
         float zMin = geoModelVolume.getZMin();
         float ySize = geoModelVolume.getYSize();
@@ -133,7 +134,7 @@ public class StsChannelAxesPanel extends StsJPanel
 
                 if (z < zMin)
                 {
-                    addToProjectAndModel(channelSet);
+                    addToProject(channelSet);
                     channelSet.setChannelsState(StsChannelSet.CHANNELS_AXES);
                     wizard.model.enableDisplay();
                     wizard.enableNext();
@@ -142,7 +143,7 @@ public class StsChannelAxesPanel extends StsJPanel
             }
         }
     }
-
+/*
     public void buildStraightLines()
     {
         channelSet = new StsChannelSet(geoModelVolume, false);
@@ -154,7 +155,7 @@ public class StsChannelAxesPanel extends StsJPanel
         StsChannel channel;
 
         float z = zMax;
-        /* loop over clusters until filled */
+        // loop over clusters until filled
         while(true)
         {
             double clusterCenter = clusterDistribBox.getSample();
@@ -175,15 +176,15 @@ public class StsChannelAxesPanel extends StsJPanel
                 z -= channelThickness;
                 if (z < zMin)
                 {
-                    addToProjectAndModel(channelSet);
+                    addToProject(channelSet);
                     return;
                 }
             }
         }
     }
-    public boolean addToProjectAndModel(StsChannelSet channelSet)
+*/
+    public boolean addToProject(StsChannelSet channelSet)
     {
-        channelSet.addToModel();
         StsProject project = wizard.getProject();
         project.objectPanelChanged();
         project.initializeViews();

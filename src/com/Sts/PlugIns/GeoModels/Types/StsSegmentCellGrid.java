@@ -1,10 +1,12 @@
 package com.Sts.PlugIns.GeoModels.Types;
 
+import com.Sts.Framework.MVC.Views.StsCursor3d;
 import com.Sts.Framework.Types.*;
 import com.Sts.Framework.UI.StsMessageFiles;
 import com.Sts.Framework.Utilities.StsException;
 import com.Sts.Framework.Utilities.StsGLDraw;
 import com.Sts.Framework.Utilities.StsMath;
+import com.Sts.PlugIns.GeoModels.DBTypes.StsChannel;
 import com.Sts.PlugIns.GeoModels.DBTypes.StsGeoModelVolume;
 
 import javax.media.opengl.GL;
@@ -27,6 +29,8 @@ public class StsSegmentCellGrid extends StsRotatedGridBoundingSubBox
 
     float z;
     boolean[][] filled;
+    int nFilledRows;
+    int nFilledCols;
 
     static final int ROW = StsRotatedGridBoundingBox.ROW;
     static final int COL = StsRotatedGridBoundingBox.COL;
@@ -99,9 +103,15 @@ public class StsSegmentCellGrid extends StsRotatedGridBoundingSubBox
                 StsGridCrossingPoint point = array[n];
                 StsGridCrossingPoint nextPoint = array[n+1];
 
-                int firstCol = StsMath.ceiling(point.jF)- colMin;
-                int lastCol = StsMath.floor(nextPoint.jF)- colMin;
-                int row = point.getRow() - rowMin;
+                int row = point.getRow();
+                if(!isInsideRowRange(row)) continue;
+                row -= rowMin; // adjust to subBox local coors
+                int firstCol = StsMath.ceiling(point.jF);
+                if(!isInsideColRange(firstCol)) continue;
+                firstCol -= colMin;
+                int lastCol = StsMath.floor(nextPoint.jF);
+                if(!isInsideColRange(lastCol)) continue;
+                lastCol -= colMin;
                 try
                 {
                     for (int col = firstCol; col <= lastCol; col++)
@@ -133,6 +143,82 @@ public class StsSegmentCellGrid extends StsRotatedGridBoundingSubBox
             loopPoints[n-1] = reversePoints[i];
         loopPoints[nTotalPoints-1] = forwardPoints[0];
         return loopPoints;
+    }
+
+    public void fillData(byte[] byteData, int nChannel)
+    {
+        int row = 0, col = 0, r = 0, c = 0, n = 0;
+
+        try
+        {
+            for (row = rowMin, r = 0; row <= rowMax; row++, r++)
+            {
+                n = row * nCols + colMin;
+                for (col = colMin, c = 0; col <= colMax; col++, c++, n++)
+                    if (filled[r][c]) byteData[n] = (byte) nChannel;
+            }
+        }
+        catch(Exception e)
+        {
+            StsException.outputWarningException(this, "fillData", "row " + row + " col " + col + " r " + r + " c " + c + " n " + n, e);
+        }
+    }
+
+    public void fillData(byte[] byteData, int dir, int nPlane, StsChannel channel)
+    {
+        int row = 0, col = 0, r = 0, c = 0, n = 0;
+
+        try
+        {
+            byte channelIndex = (byte)channel.getIndex();
+            int channelSliceMin = channel.getSliceMin();
+            int channelSliceMax = channel.getSliceMax();
+            int nChannelSlices = channelSliceMax - channelSliceMin + 1;
+
+            // vertical plane is at a given xPlane (constant x) so is along a column thru the segment
+            // so check filled 2d array along segment col
+            if(dir == StsCursor3d.XDIR)
+            {
+                int planeCol = nPlane;
+                if(!subBoxContainsCol(planeCol)) return;
+
+                int segmentCol = planeCol - colMin;
+                n = rowMin*nSlices + channelSliceMin;
+
+                for (row = rowMin, r = 0; row <= rowMax; row++, r++, n += nSlices)
+                {
+                    boolean cellFilled = filled[r][segmentCol];
+                    if(cellFilled)
+                    {
+                        for(int i = 0; i < nChannelSlices; i++)
+                            byteData[n+i] = channelIndex;
+                    }
+                }
+            }
+            else if(dir == StsCursor3d.YDIR)
+            {
+                int planeRow = nPlane;
+                if(!subBoxContainsRow(planeRow)) return;
+
+                int segmentRow = planeRow - rowMin;
+                n = colMin*nSlices + channelSliceMin;
+
+                for (col = colMin, c = 0; col <= colMax; col++, c++, n += nSlices)
+                {
+                    boolean cellFilled = filled[segmentRow][c];
+                    if(cellFilled)
+                    {
+                        for(int i = 0; i < nChannelSlices; i++)
+                            byteData[n+i] = channelIndex;
+                    }
+                }
+            }
+
+        }
+        catch(Exception e)
+        {
+            StsException.outputWarningException(this, "fillData", "row " + row + " col " + col + " r " + r + " c " + c + " n " + n, e);
+        }
     }
 
     public void display(GL gl, StsColor stsColor, boolean stipple)

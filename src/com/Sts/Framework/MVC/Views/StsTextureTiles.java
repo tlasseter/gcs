@@ -64,13 +64,16 @@ public class StsTextureTiles
     /** flag to indicate surface displayList (geometry) should be deleted */
 //    private boolean deleteDisplayList = true;
 
+    transient boolean cellCenteredTexture = false;
+
     static private boolean runTimer = false;
     static private StsTimer timer = null;
     static public final boolean debug = StsGLPanel.textureDebug;
 
     static final float nullValue = StsParameters.nullValue;
 
-    private StsTextureTiles(StsModel model, StsTextureSurfaceFace textureSurface, int dirNo, StsRotatedGridBoundingBox boundingBox, boolean isPixelMode, StsCropVolume cropVolume)
+    private StsTextureTiles(StsModel model, StsTextureSurfaceFace textureSurface, int dirNo, StsRotatedGridBoundingBox boundingBox,
+                            boolean isPixelMode, StsCropVolume cropVolume, boolean cellCenteredTexture)
     {
         this.model = model;
         this.textureSurface = textureSurface;
@@ -78,7 +81,7 @@ public class StsTextureTiles
         this.isPixelMode = isPixelMode;
         this.cropVolume = cropVolume;
         if (runTimer && timer == null) timer = new StsTimer();
-        constructTiles(boundingBox);
+        constructTiles(boundingBox, cellCenteredTexture);
         initShader();
         StsTextureList.addTextureToList(textureSurface);
         if (debug) System.out.println("StsTextureTiles.constructor() for " + textureSurface.toString() + " called on thread " + Thread.currentThread().getName() + " dirNo " + dir);
@@ -109,10 +112,11 @@ public class StsTextureTiles
         if (debug) System.out.println("StsTextureTiles.constructor(nTextureRows, nTextureCols, ...) for " + textureSurface.toString() + " called on thread " + Thread.currentThread().getName());
     }
 
-    public void constructTiles(StsRotatedGridBoundingBox boundingBox)
+    public void constructTiles(StsRotatedGridBoundingBox boundingBox, boolean cellCenteredTexture)
     {
         this.boundingBox = boundingBox;
         setGridSize(dir);
+        this.cellCenteredTexture = cellCenteredTexture;
         constructTiles(StsGLPanel.maxTextureSize);
     }
 
@@ -145,12 +149,13 @@ public class StsTextureTiles
         cropChanged();
     }
 
-    static public StsTextureTiles constructor(StsModel model, StsTextureSurfaceFace textureSurface, int dirNo, StsRotatedGridBoundingBox boundingBox, boolean isPixelMode, StsCropVolume cropVolume)
+    static public StsTextureTiles constructor(StsModel model, StsTextureSurfaceFace textureSurface, int dirNo,
+                                              StsRotatedGridBoundingBox boundingBox, boolean isPixelMode, StsCropVolume cropVolume, boolean cellCenteredTexture)
     {
         // if (!glPanel.initialized) return null;  // glPanel not initialized yet
         try
         {
-            return new StsTextureTiles(model, textureSurface, dirNo, boundingBox, isPixelMode, cropVolume);
+            return new StsTextureTiles(model, textureSurface, dirNo, boundingBox, isPixelMode, cropVolume, cellCenteredTexture);
         }
         catch (Exception e)
         {
@@ -287,19 +292,19 @@ public class StsTextureTiles
             int col = 0;
             for (int nTileCol = 0; nTileCol < nTileCols - 1; nTileCol++, nTile++)
             {
-                tiles[nTile] = new StsTextureTile(nTotalRows, nTotalCols, row, col, this, maxTextureSize, nTile);
+                tiles[nTile] = new StsTextureTile(nTotalRows, nTotalCols, row, col, this, maxTextureSize, cellCenteredTexture, nTile);
                 col += (maxTextureSize - 1);
             }
-            tiles[nTile++] = new StsTextureTile(nTotalRows, nTotalCols, row, col, this, maxTextureSize, nTile);
+            tiles[nTile++] = new StsTextureTile(nTotalRows, nTotalCols, row, col, this, maxTextureSize, cellCenteredTexture, nTile);
             row += (maxTextureSize - 1);
         }
         int col = 0;
         for (int nTileCol = 0; nTileCol < nTileCols - 1; nTileCol++, nTile++)
         {
-            tiles[nTile] = new StsTextureTile(nTotalRows, nTotalCols, row, col, this, maxTextureSize, nTile);
+            tiles[nTile] = new StsTextureTile(nTotalRows, nTotalCols, row, col, this, maxTextureSize, cellCenteredTexture, nTile);
             col += (maxTextureSize - 1);
         }
-        tiles[nTile++] = new StsTextureTile(nTotalRows, nTotalCols, row, col, this, maxTextureSize, nTile);
+        tiles[nTile++] = new StsTextureTile(nTotalRows, nTotalCols, row, col, this, maxTextureSize, cellCenteredTexture, nTile);
 
         if (runTimer) timer.stopPrint("Construct tiles for direction " + dir + ".");
         //       deleteTextures = true;

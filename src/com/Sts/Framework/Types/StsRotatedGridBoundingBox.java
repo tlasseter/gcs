@@ -206,6 +206,16 @@ public class StsRotatedGridBoundingBox extends StsRotatedBoundingBox implements 
         colNumInc = 0.0f;
     }
 
+    public boolean isInsideRowRange(int row)
+    {
+        return row >= 0 && row <= nRows - 1;
+    }
+
+    public boolean isInsideColRange(int col)
+    {
+        return col >= 0 && col <= nCols - 1;
+    }
+
     public boolean isInsideRowColRange(int row, int col)
     {
         return row >= 0 && row <= nRows - 1 && col >= 0 && col <= nCols - 1;
@@ -423,6 +433,7 @@ public class StsRotatedGridBoundingBox extends StsRotatedBoundingBox implements 
 		}
 		this.nRows = box.nRows;
 		this.nCols = box.nCols;
+        this.nSlices = box.nSlices;
     }
 /*
     public void checkMakeCongruent(StsRotatedGridBoundingBox box)
@@ -2443,6 +2454,26 @@ public class StsRotatedGridBoundingBox extends StsRotatedBoundingBox implements 
         int nRows = this.nRows - 1;
         int nCols = this.nCols - 1;
         return new StsRotatedGridBoundingBox(nRows, nCols, xOrigin, yOrigin, xMin, yMin, xInc, yInc, false);
+    }
+
+    public int getNSamplesInPlane(int dir)
+    {
+        if (dir == YDIR)
+            return nSlices * nCols;
+        else if (dir == XDIR)
+            return nSlices * nRows;
+        else // dirNo == ZDIR
+            return nRows * nCols;
+    }
+
+    public int getNCellsInPlane(int dir)
+    {
+        if (dir == YDIR)
+            return (nSlices - 1) * (nCols - 1);
+        else if (dir == XDIR)
+            return (nSlices - 1) * (nRows - 1);
+        else // dirNo == ZDIR
+            return (nRows - 1) * (nCols - 1);
     }
 
     public static void main(String[] args)

@@ -3,7 +3,6 @@ package com.Sts.PlugIns.GeoModels.Types;
 import com.Sts.Framework.MVC.Views.StsGLPanel3d;
 import com.Sts.Framework.Types.StsColor;
 import com.Sts.Framework.Types.StsPoint;
-import com.Sts.Framework.Types.StsRotatedGridBoundingBox;
 import com.Sts.Framework.Utilities.StsException;
 import com.Sts.Framework.Utilities.StsGLDraw;
 import com.Sts.Framework.Utilities.StsMath;
@@ -211,5 +210,17 @@ public class StsChannelArcSegment extends StsChannelSegment
     {
         channelCellGrid = new StsSegmentCellGrid(outerPoints, innerPoints, geoModelVolume, startPoint.getZ());
         pointBarCellGrid = new StsSegmentCellGrid(innerPoints, basePoints, geoModelVolume, startPoint.getZ());
+    }
+
+    public void fillData(byte[] byteData, int nChannel)
+    {
+        channelCellGrid.fillData(byteData, nChannel);
+        pointBarCellGrid.fillData(byteData, nChannel);
+    }
+
+    public void fillData(byte[] byteData, int dir, int nPlane, StsChannel channel)
+    {
+        channelCellGrid.fillData(byteData, dir, nPlane, channel);
+        pointBarCellGrid.fillData(byteData, dir, nPlane, channel);
     }
 }
