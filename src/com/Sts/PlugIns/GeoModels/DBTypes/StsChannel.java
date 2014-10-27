@@ -109,19 +109,23 @@ public class StsChannel extends StsRotatedGridBoundingSubBox implements StsTreeO
     public void display(StsGLPanel3d glPanel3d, boolean displayCenterLinePoints, boolean displayAxes, byte drawType, int zPlane)
     {
         if(subBoxContainsSlice(zPlane))
-            display(glPanel3d, displayCenterLinePoints, displayAxes, drawType);
+            display(glPanel3d, displayCenterLinePoints, drawType);
     }
 
-    public void display(StsGLPanel3d glPanel3d, boolean displayCenterLinePoints, boolean displayAxes, byte drawType)
+    public void display(StsGLPanel3d glPanel3d, boolean displayCenterLinePoints, byte drawType)
     {
         GL gl = glPanel3d.getGL();
 
         byte channelsState = channelSet.getChannelsState();
-        if(channelsState == StsChannelSet.CHANNELS_AXES || displayAxes)
+        if(channelsState >= StsChannelSet.CHANNELS_AXES  && drawType == StsChannelClass.DRAW_AXES)
         {
             StsGLDraw.drawLine(gl, stsColor, true, new StsPoint[] { startPoint, endPoint});
         }
-        else if(channelsState == StsChannelSet.CHANNELS_ARCS) // || channelsState == StsChannelSet.CHANNELS_GRIDS)
+        else if(channelsState >= StsChannelSet.CHANNELS_ARCS  && drawType == StsChannelClass.DRAW_LINES)
+        {
+            drawChannelSegments(glPanel3d, displayCenterLinePoints, channelsState, drawType);
+        }
+        if(channelsState >= StsChannelSet.CHANNELS_ARCS && drawType == StsChannelClass.DRAW_FILLED) // || channelsState == StsChannelSet.CHANNELS_GRIDS)
         {
             if (!currentModel.useDisplayLists && usingDisplayLists)
             {
