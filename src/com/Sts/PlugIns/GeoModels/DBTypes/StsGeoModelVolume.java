@@ -119,13 +119,13 @@ public class StsGeoModelVolume extends StsRotatedGridBoundingBox implements StsT
         }
         else
         {
-            xInc = 10;
-            yInc = 10;
+            xInc = 5;
+            yInc = 5;
             zInc = 0.2f;
 
-            nRows = 1001;
-            nCols = 1001;
-            nSlices = 501;
+            nRows = 2001;
+            nCols = 2001;
+            nSlices = 2001;
         }
         centeredGrid = createCenteredGrid();
         initializeColorscale();

@@ -138,6 +138,7 @@ public class StsChannelAxesPanel extends StsJPanel
                     channelSet.setChannelsState(StsChannelSet.CHANNELS_AXES);
                     wizard.model.enableDisplay();
                     wizard.enableNext();
+                    buildButton.setEnabled(false);
                     return;
                 }
             }

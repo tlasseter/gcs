@@ -1696,7 +1696,21 @@ public class StsModel extends StsSerialize
         win3d.repaint();
     }
 
-	public void repaintViews(Class viewClass)
+    public void repaintWin3dLaterOnEventThread()
+    {
+        StsToolkit.runLaterOnEventThread
+        (
+            new Runnable()
+            {
+                public void run()
+                {
+                    repaintWin3d();
+                }
+            }
+        );
+    }
+
+    public void repaintViews(Class viewClass)
 	{
 		if(!displayOK) return;
 

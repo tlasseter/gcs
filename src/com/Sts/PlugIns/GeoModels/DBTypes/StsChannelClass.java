@@ -12,6 +12,7 @@ import com.Sts.Framework.UI.Beans.StsComboBoxFieldBean;
 import com.Sts.Framework.UI.Beans.StsFieldBean;
 import com.Sts.Framework.UI.Beans.StsIntFieldBean;
 import com.Sts.Framework.Utilities.StsParameters;
+import com.Sts.Framework.Utilities.StsToolkit;
 
 import java.util.Iterator;
 
@@ -92,6 +93,12 @@ public class StsChannelClass extends StsModelObjectPanelClass implements StsSeri
             return null;
         }
 
+        private StsChannel getNext()
+        {
+            if(!iterator.hasNext()) return null;
+            return (StsChannel)iterator.next();
+        }
+
         public boolean hasNext()
         {
             return next != null;
@@ -99,8 +106,8 @@ public class StsChannelClass extends StsModelObjectPanelClass implements StsSeri
         public StsChannel next()
         {
             StsChannel currentNext = next;
-            next = (StsChannel) iterator.next();
-            if (!next.subBoxContainsSlice(nSlice)) next = null;
+            next = getNext();
+            if(next != null && !next.subBoxContainsSlice(nSlice)) next = null;
             return currentNext;
         }
 
@@ -198,7 +205,7 @@ public class StsChannelClass extends StsModelObjectPanelClass implements StsSeri
         this.drawType = drawType;
         currentModel.getCursor3d().textureChanged();
         displayChanged = true;
-        currentModel.repaintWin3d();
+        currentModel.repaintWin3dLaterOnEventThread();
     }
 
     public byte getDrawTypeByte() { return drawType; }

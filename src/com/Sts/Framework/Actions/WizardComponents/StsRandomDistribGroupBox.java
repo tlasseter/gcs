@@ -34,7 +34,9 @@ public class StsRandomDistribGroupBox extends StsGroupBox implements StsRandomDi
 
     private Random random = createRandom();
 
-    static public final long randomSeed = 1;
+    static public final long randomStartSeed = 1;
+    static public long seed = randomStartSeed;
+
     static private String[] typeStrings = StsRandomDistribFace.typeStrings;
 
     public StsRandomDistribGroupBox(double avg, double dev, byte type, String valueName)
@@ -52,8 +54,8 @@ public class StsRandomDistribGroupBox extends StsGroupBox implements StsRandomDi
 
     static public Random createRandom()
     {
-        if(randomSeed != 0)
-            return new Random(randomSeed);
+        if(seed != 0)
+            return new Random(seed++);
         else
             return new Random();
     }

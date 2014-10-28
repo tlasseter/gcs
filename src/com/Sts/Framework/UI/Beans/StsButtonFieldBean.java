@@ -112,6 +112,33 @@ public class StsButtonFieldBean extends StsFieldBean
 		button.setEnabled(editable);
 	}
 
+    public void disable()
+    {
+        StsToolkit.runLaterOnEventThread
+        (
+            new Runnable()
+            {
+                public void run()
+                {
+                    button.setEnabled(false);
+                }
+            }
+        );
+    }
+
+    public void enable()
+    {
+        StsToolkit.runLaterOnEventThread
+                (
+                        new Runnable()
+                        {
+                            public void run()
+                            {
+                                button.setEnabled(true);
+                            }
+                        }
+                );
+    }
 	public void testButton() { System.out.println("Button pushed."); }
 
 	public static void main(String[] args)

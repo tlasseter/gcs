@@ -2,14 +2,19 @@ package com.Sts.PlugIns.GeoModels.Actions.Wizards.Channels;
 
 import com.Sts.Framework.Actions.WizardComponents.StsRandomDistribGroupBox;
 import com.Sts.Framework.Actions.Wizards.StsWizard;
+import com.Sts.Framework.Actions.Wizards.StsWizardStepProgressPanel;
 import com.Sts.Framework.DBTypes.StsObjectRefList;
+import com.Sts.Framework.Interfaces.StsProgressRunnable;
 import com.Sts.Framework.Interfaces.StsRandomDistribFace;
 import com.Sts.Framework.Types.StsPoint;
 import com.Sts.Framework.Types.StsRotatedGridBoundingBox;
 import com.Sts.Framework.UI.Beans.StsButtonFieldBean;
 import com.Sts.Framework.UI.Beans.StsGroupBox;
 import com.Sts.Framework.UI.Beans.StsJPanel;
+import com.Sts.Framework.UI.Progress.StsProgressBar;
+import com.Sts.Framework.UI.Progress.StsProgressPanel;
 import com.Sts.Framework.Utilities.StsMath;
+import com.Sts.Framework.Utilities.StsToolkit;
 import com.Sts.PlugIns.GeoModels.DBTypes.StsChannel;
 import com.Sts.PlugIns.GeoModels.DBTypes.StsChannelClass;
 import com.Sts.PlugIns.GeoModels.DBTypes.StsChannelSet;
@@ -40,6 +45,7 @@ public class StsChannelGeometryPanel extends StsJPanel
     private StsGroupBox buttonBox;
     private StsButtonFieldBean buildButton;
     public StsButtonFieldBean buildGridButton;
+    private StsProgressPanel progressPanel;
 
     static float channelArcRadiusDivWidthAvg = 5;
     static float channelArcRadiusDivWidthDev = 2;
@@ -76,6 +82,10 @@ public class StsChannelGeometryPanel extends StsJPanel
         buildGridButton = new StsButtonFieldBean("Build Grid", "Build the 3D grid.", this, "buildGrid");
         buttonBox.addToRow(buildButton);
         buttonBox.addEndRow(buildGridButton);
+        buttonBox.gbc.gridwidth = 2;
+        buttonBox.gbc.fill = GridBagConstraints.HORIZONTAL;
+        progressPanel = new StsProgressPanel(true);
+        buttonBox.addEndRow(progressPanel);
     }
 
     public void initialize()
@@ -107,104 +117,168 @@ public class StsChannelGeometryPanel extends StsJPanel
 
     public void build()
     {
-        StsChannelSet channelSet = ((StsCreateChannelsWizard)wizard).getChannelSet();
-        StsObjectRefList channels = channelSet.getChannels();
-        Iterator<StsChannel> iter = channels.getIterator();
-        boolean lastRotateCW = true;
-        // don't draw views until construction complete
-        wizard.model.disableDisplay();
-        wizard.disableNext();
-        while(iter.hasNext())
+        StsProgressRunnable runnable = new StsProgressRunnable()
         {
-            StsChannel channel = iter.next();
-            StsPoint startPoint = channel.getStartPoint();
-            float channelDirection = channel.getDirection();
-            float segmentDirection = channelDirection;
-            boolean isArc = false; // first segment will be line
-            StsPoint lastPoint = startPoint;
-            float channelWidth = channel.getChannelWidth();
-            StsChannelSegment segment;
-            ArrayList<StsChannelSegment> segments = new ArrayList<>();
-            while(insideVolume(geoModelVolume, lastPoint))
+            public void run()
             {
-                if(isArc)
-                {
-                    float radius = (float)channelArcRadiusDivWidthDistribBox.getSample()*channelWidth;
-                    float arcAngle = (float)channelArcAngleDistribBox.getSample();
-                    // rotation angle is angle from current segmentDirection back to channel direction
-                    double rotationAngle = StsChannelArcSegment.subtractAngles(segmentDirection, channelDirection);
-                    // if segmentDirection is more than 30 degrees away from channel direction, rotate the opposite way;
-                    // otherwise rotate the opposite of the previous rotation
-                    boolean rotateCW;
-                    if(rotationAngle > maxBackwardsAngle)
-                        rotateCW = true;
-                    else if(rotationAngle < -maxBackwardsAngle)
-                        rotateCW = false;
-                    else
-                        rotateCW = !lastRotateCW;
-                    // arcAngle is negative for a CW rotation
-                    if(rotateCW) arcAngle = -arcAngle;
-                    // check to see if this next rotation is too far back; if so, limit the arcAngle
-                    nextSegmentDirection = segmentDirection + arcAngle; // wrap past 180 to keep track of winding
-                    nextRotationAngle = nextSegmentDirection - channelDirection; // wrap past 180 to keep track of winding
-                    if (nextRotationAngle < -limitRotateAngle)
-                        arcAngle += -limitRotateAngle - nextRotationAngle;
-                    else if (nextRotationAngle > limitRotateAngle)
-                        arcAngle -= nextRotationAngle - limitRotateAngle;
+                doBuild();
+            }
 
-                    segment = new StsChannelArcSegment(channel, segmentDirection, radius, arcAngle, lastPoint);
-                    segments.add(segment);
-                    lastPoint = segment.getLastPoint();
+            public void cancel()
+            {
+                progressPanel.cancel();
+            }
+        };
+        StsToolkit.runRunnable(runnable);
+    }
 
-                    segmentDirection += arcAngle;
-                    lastRotateCW = rotateCW;
-                }
-                else
+    public void doBuild()
+    {
+        try
+        {
+            StsChannelSet channelSet = ((StsCreateChannelsWizard) wizard).getChannelSet();
+            StsObjectRefList channels = channelSet.getChannels();
+            int nChannels = channels.getSize();
+            progressPanel.initialize(nChannels);
+            Iterator<StsChannel> iter = channels.getIterator();
+            boolean lastRotateCW = true;
+            // don't draw views until construction complete
+            wizard.model.disableDisplay();
+            wizard.disableNext();
+            while (iter.hasNext())
+            {
+                if (progressPanel.isCanceled()) return;   // todo:  need to cleanup partially built objects (abort transaction)
+
+                StsChannel channel = iter.next();
+                StsPoint startPoint = channel.getStartPoint();
+                float channelDirection = channel.getDirection();
+                float segmentDirection = channelDirection;
+                boolean isArc = false; // first segment will be line
+                StsPoint lastPoint = startPoint;
+                float channelWidth = channel.getChannelWidth();
+                StsChannelSegment segment;
+                ArrayList<StsChannelSegment> segments = new ArrayList<>();
+                while (insideVolume(geoModelVolume, lastPoint))
                 {
-                    if(StsMath.betweenInclusive(segmentDirection, -limitAddLineAngle, limitAddLineAngle))
+                    if (isArc)
                     {
-                        float length = (float) channelLineLengthDivWidthDistribBox.getSample()*channelWidth;
-                        segment = new StsChannelLineSegment(channel, lastPoint, segmentDirection, length);
+                        float radius = (float) channelArcRadiusDivWidthDistribBox.getSample() * channelWidth;
+                        float arcAngle = (float) channelArcAngleDistribBox.getSample();
+                        // rotation angle is angle from current segmentDirection back to channel direction
+                        double rotationAngle = StsChannelArcSegment.subtractAngles(segmentDirection, channelDirection);
+                        // if segmentDirection is more than 30 degrees away from channel direction, rotate the opposite way;
+                        // otherwise rotate the opposite of the previous rotation
+                        boolean rotateCW;
+                        if (rotationAngle > maxBackwardsAngle)
+                            rotateCW = true;
+                        else if (rotationAngle < -maxBackwardsAngle)
+                            rotateCW = false;
+                        else
+                            rotateCW = !lastRotateCW;
+                        // arcAngle is negative for a CW rotation
+                        if (rotateCW) arcAngle = -arcAngle;
+                        // check to see if this next rotation is too far back; if so, limit the arcAngle
+                        nextSegmentDirection = segmentDirection + arcAngle; // wrap past 180 to keep track of winding
+                        nextRotationAngle = nextSegmentDirection - channelDirection; // wrap past 180 to keep track of winding
+                        if (nextRotationAngle < -limitRotateAngle)
+                            arcAngle += -limitRotateAngle - nextRotationAngle;
+                        else if (nextRotationAngle > limitRotateAngle)
+                            arcAngle -= nextRotationAngle - limitRotateAngle;
+
+                        segment = new StsChannelArcSegment(channel, segmentDirection, radius, arcAngle, lastPoint);
                         segments.add(segment);
                         lastPoint = segment.getLastPoint();
-                    }
-                }
-                isArc = !isArc; // alternate arcs and lines; but draw lines only if segment direction is close to channel direction
-            }
-            channel.channelSegments = segments.toArray(new StsChannelSegment[0]);
-            channelSet.setChannelsState(StsChannelSet.CHANNELS_ARCS);
-        }
-        wizard.model.enableDisplay();
-        buildButton.setEnabled(false);
-        buildGridButton.setEnabled(true);
-        wizard.enableFinish();
-        StsChannelClass channelClass = (StsChannelClass)wizard.getModel().getStsClass(StsChannel.class);
-        channelClass.setDrawType(StsChannelClass.DRAW_FILLED_STRING);
-        wizard.model.win3dDisplay();
 
+                        segmentDirection += arcAngle;
+                        lastRotateCW = rotateCW;
+                    }
+                    else
+                    {
+                        if (StsMath.betweenInclusive(segmentDirection, -limitAddLineAngle, limitAddLineAngle))
+                        {
+                            float length = (float) channelLineLengthDivWidthDistribBox.getSample() * channelWidth;
+                            segment = new StsChannelLineSegment(channel, lastPoint, segmentDirection, length);
+                            segments.add(segment);
+                            lastPoint = segment.getLastPoint();
+                        }
+                    }
+                    isArc = !isArc; // alternate arcs and lines; but draw lines only if segment direction is close to channel direction
+                }
+                channel.channelSegments = segments.toArray(new StsChannelSegment[0]);
+                channelSet.setChannelsState(StsChannelSet.CHANNELS_ARCS);
+                progressPanel.incrementCount();
+            }
+
+            buildButton.disable();
+            buildGridButton.enable();
+            // wizard.enableFinish();
+            StsChannelClass channelClass = (StsChannelClass) wizard.getModel().getStsClass(StsChannel.class);
+            channelClass.setDrawType(StsChannelClass.DRAW_FILLED_STRING);
+            wizard.model.win3dDisplay();
+        }
+        catch(Exception e)
+        {
+            progressPanel.setDescriptionAndLevel(e.getMessage(), StsProgressBar.ERROR);
+        }
+        finally
+        {
+            wizard.model.enableDisplay();
+        }
     }
 
     public void buildGrid()
     {
-        StsChannelSet channelSet = ((StsCreateChannelsWizard)wizard).getChannelSet();
-        StsObjectRefList channels = channelSet.getChannels();
-        float nSlices = geoModelVolume.getNSlices();
-
-        StsRotatedGridBoundingBox centeredGrid = geoModelVolume.createCenteredGrid();
-        Iterator<StsChannel> iter = channels.getIterator();
-        // don't draw views until construction complete
-        wizard.model.disableDisplay();
-        wizard.disableNext();
-        while(iter.hasNext())
+        StsProgressRunnable runnable = new StsProgressRunnable()
         {
-            StsChannel channel = iter.next();
-            for(StsChannelSegment channelSegment : channel.channelSegments)
-                channelSegment.buildGrids(geoModelVolume);
-            channelSet.setChannelsState(StsChannelSet.CHANNELS_GRIDS);
+            public void run()
+            {
+                doBuildGrid();
+            }
+
+            public void cancel()
+            {
+                progressPanel.cancel();
+            }
+        };
+        StsToolkit.runRunnable(runnable);
+    }
+
+    public void doBuildGrid()
+    {
+        try
+        {
+            StsChannelSet channelSet = ((StsCreateChannelsWizard)wizard).getChannelSet();
+            StsObjectRefList channels = channelSet.getChannels();
+            int nChannels = channels.getSize();
+            progressPanel.initialize(nChannels);
+            progressPanel.setCount(0);
+            StsRotatedGridBoundingBox centeredGrid = geoModelVolume.createCenteredGrid();
+            Iterator<StsChannel> iter = channels.getIterator();
+            // don't draw views until construction complete
+            wizard.model.disableDisplay();
+            wizard.disableNext();
+            while(iter.hasNext())
+            {
+                if (progressPanel.isCanceled()) return; // todo:  need to cleanup partially built objects
+
+                StsChannel channel = iter.next();
+                for(StsChannelSegment channelSegment : channel.channelSegments)
+                    channelSegment.buildGrids(geoModelVolume);
+                channelSet.setChannelsState(StsChannelSet.CHANNELS_GRIDS);
+                progressPanel.incrementCount();
+            }
+            buildGridButton.disable();
+            wizard.model.enableDisplay();
+            wizard.enableFinish();
         }
-        wizard.model.enableDisplay();
-        wizard.enableFinish();
-        wizard.model.win3dDisplay();
+        catch(Exception e)
+        {
+            progressPanel.setDescriptionAndLevel(e.getMessage(), StsProgressBar.ERROR);
+        }
+        finally
+        {
+            wizard.model.enableDisplay();
+        }
     }
 
     private boolean insideVolume(StsGeoModelVolume geoModelVolume, StsPoint lastPoint)
