@@ -2,13 +2,8 @@ package com.Sts.PlugIns.GeoModels.Actions.Wizards.Channels;
 
 import com.Sts.Framework.Actions.Wizards.StsWizard;
 import com.Sts.Framework.Actions.Wizards.StsWizardStep;
-import com.Sts.Framework.DBTypes.StsProject;
 import com.Sts.Framework.MVC.StsActionManager;
-import com.Sts.Framework.UI.Progress.StsProgressPanel;
-import com.Sts.Framework.UI.StsMessage;
-import com.Sts.Framework.Utilities.StsParameters;
 import com.Sts.PlugIns.GeoModels.DBTypes.StsChannelSet;
-import com.Sts.PlugIns.GeoModels.DBTypes.StsGeoModelVolume;
 
 /**
  * Created by tom on 9/23/2014.
@@ -17,14 +12,14 @@ import com.Sts.PlugIns.GeoModels.DBTypes.StsGeoModelVolume;
 public class StsCreateChannelsWizard extends StsWizard
 {
     String volName = "geoVolumeName";
-    public StsChannelsAxesStep channelAxes = new StsChannelsAxesStep(this);
+    public StsChannelAxesStep channelAxes = new StsChannelAxesStep(this);
     public StsChannelGeometryStep channelGeometry = new StsChannelGeometryStep(this);
 
     public StsCreateChannelsWizard(StsActionManager actionManager)
     {
         super(actionManager);
         addSteps();
-        dialog.setPreferredSize(800, 600);
+        dialog.setPreferredSize(800, 700);
     }
 
     public void addSteps()

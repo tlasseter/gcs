@@ -200,7 +200,7 @@ public class StsGeoModelCursorSection extends StsCursor3dVolumeTexture
         // if (!glPanel3d.initialized) return false;
         if (geoModelVolume == null) return false;
 
-        if(channelClass.getDrawTypeByte() != StsChannelClass.DRAW_ZPLANE) return false;
+        if(channelClass.getDrawTypeByte() != StsChannelClass.DRAW_GRID) return false;
 
         if (textureTiles == null)
         {

@@ -20,7 +20,7 @@ public class StsChannelGeometryStep extends StsWizardStep
         panel = new StsChannelGeometryPanel(wizard, this);
         header = new StsHeaderPanel();
         setPanels(panel, header);
-        header.setTitle("Channel Axes Definition");
+        header.setTitle("Channel Geometry Definition");
         header.setSubtitle("Define Geometries for Channel Bodies");
         header.setInfoText(wizardDialog,"      **** Edit distribution functions *****\n" +
                 "Each channel consists of alternating circular arcs and straight sections.\n" +

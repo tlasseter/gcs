@@ -307,7 +307,7 @@ public class StsWin3d extends StsWin3dFull implements StsSerializable
      protected void createAddToolbars()
      {
          super.createAddToolbars();
-//         addToolbar(new StsMediaToolbar(this));
+         addToolbar(new StsMediaToolbar(this));
 //         addToolbar(new StsCollaborationToolbar(this));
      }
 

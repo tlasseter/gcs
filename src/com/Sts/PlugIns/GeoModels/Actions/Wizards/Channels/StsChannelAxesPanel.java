@@ -20,7 +20,7 @@ import java.awt.*;
 public class StsChannelAxesPanel extends StsJPanel
 {
     private StsWizard wizard;
-    private StsChannelsAxesStep wizardStep;
+    private StsChannelAxesStep wizardStep;
     private StsGeoModelVolume geoModelVolume;
 
     private StsRandomDistribGroupBox channelWidthDistribBox, widthThicknessRatioDistribBox;
@@ -39,7 +39,7 @@ public class StsChannelAxesPanel extends StsJPanel
 
     private StsChannelSet channelSet;
 
-    public StsChannelAxesPanel(StsWizard wizard, StsChannelsAxesStep wizardStep)
+    public StsChannelAxesPanel(StsWizard wizard, StsChannelAxesStep wizardStep)
     {
         super(true); // true adds insets
         this.wizard = wizard;

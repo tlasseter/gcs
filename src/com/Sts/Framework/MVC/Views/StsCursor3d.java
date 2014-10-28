@@ -1611,7 +1611,6 @@ public class StsCursor3d implements Serializable
     {
         return row;
     }
-
     public int getCol()
     {
         return col;
@@ -1621,7 +1620,6 @@ public class StsCursor3d implements Serializable
     {
         this.row = row;
     }
-
     public void setCol(int col)
     {
         this.col = col;
@@ -1629,7 +1627,6 @@ public class StsCursor3d implements Serializable
 
     public StsCursorSection getColCursorSection() { return cursorSections[XDIR]; }
     public StsCursorSection getRowCursorSection() { return cursorSections[YDIR]; }
-    public StsCursorSection getSliceCursorSection() { return cursorSections[ZDIR]; }
 
 	public StsRotatedGridBoundingBox getRotatedBoundingBox()
 	{

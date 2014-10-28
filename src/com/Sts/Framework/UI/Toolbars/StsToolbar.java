@@ -36,7 +36,7 @@ public class StsToolbar extends JToolBar implements StsSerializable
     transient private StsWin3dBase parentWindow = null;
     protected boolean isVisible; //separate from JComponent.visible
 	//    transient private StsGLPanel3d glPanel3d;
-		protected transient StsActionManager windowActionManager;
+	protected transient StsActionManager windowActionManager;
 
 	public StsToolbar()
 	{

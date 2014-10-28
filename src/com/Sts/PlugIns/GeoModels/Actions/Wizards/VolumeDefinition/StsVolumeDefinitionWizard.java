@@ -23,7 +23,7 @@ public class StsVolumeDefinitionWizard extends StsWizard
     {
         super(actionManager);
         addSteps();
-        dialog.setPreferredSize(800, 600);
+        dialog.setPreferredSize(700, 400);
     }
 
     public void addSteps()

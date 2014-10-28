@@ -7,9 +7,11 @@ import com.Sts.Framework.Interfaces.StsRandomDistribFace;
 import com.Sts.Framework.Types.StsPoint;
 import com.Sts.Framework.Types.StsRotatedGridBoundingBox;
 import com.Sts.Framework.UI.Beans.StsButtonFieldBean;
+import com.Sts.Framework.UI.Beans.StsGroupBox;
 import com.Sts.Framework.UI.Beans.StsJPanel;
 import com.Sts.Framework.Utilities.StsMath;
 import com.Sts.PlugIns.GeoModels.DBTypes.StsChannel;
+import com.Sts.PlugIns.GeoModels.DBTypes.StsChannelClass;
 import com.Sts.PlugIns.GeoModels.DBTypes.StsChannelSet;
 import com.Sts.PlugIns.GeoModels.DBTypes.StsGeoModelVolume;
 import com.Sts.PlugIns.GeoModels.Types.StsChannelArcSegment;
@@ -35,15 +37,16 @@ public class StsChannelGeometryPanel extends StsJPanel
 
     private StsRandomDistribGroupBox channelArcRadiusDivWidthDistribBox, channelArcAngleDistribBox;
     private StsRandomDistribGroupBox channelLineLengthDivWidthDistribBox;
+    private StsGroupBox buttonBox;
     private StsButtonFieldBean buildButton;
-    private StsButtonFieldBean buildGridButton;
+    public StsButtonFieldBean buildGridButton;
 
     static float channelArcRadiusDivWidthAvg = 5;
     static float channelArcRadiusDivWidthDev = 2;
     static float channelArcAngleAvg = 135;
     static float channelArcAngleDev = 45;
-    static float channelLineLengthDivWidthAvg = 4;
-    static float channelLineLengthDivWidthDev = 2;
+    static float channelLineLengthDivWidthAvg = 2;
+    static float channelLineLengthDivWidthDev = 3;
 
     private StsChannelSet channelSet;
 
@@ -67,9 +70,12 @@ public class StsChannelGeometryPanel extends StsJPanel
     {
         channelArcRadiusDivWidthDistribBox = new StsRandomDistribGroupBox(channelArcRadiusDivWidthAvg, channelArcRadiusDivWidthDev, StsRandomDistribFace.TYPE_LOGNORM, "Channel arc radius/width");
         channelArcAngleDistribBox = new StsRandomDistribGroupBox(channelArcAngleAvg, channelArcAngleDev, StsRandomDistribFace.TYPE_GAUSS, "Channel arc angle");
-        channelLineLengthDivWidthDistribBox = new StsRandomDistribGroupBox(channelLineLengthDivWidthAvg, channelLineLengthDivWidthDev, StsRandomDistribFace.TYPE_LOGNORM, "Channel line/width length");
+        channelLineLengthDivWidthDistribBox = new StsRandomDistribGroupBox(channelLineLengthDivWidthAvg, channelLineLengthDivWidthDev, StsRandomDistribFace.TYPE_LOGNORM, "Channel line length/width");
+        buttonBox = new StsGroupBox("Construction Operations");
         buildButton = new StsButtonFieldBean("Build", "Execute build for this set.", this, "build");
         buildGridButton = new StsButtonFieldBean("Build Grid", "Build the 3D grid.", this, "buildGrid");
+        buttonBox.addToRow(buildButton);
+        buttonBox.addEndRow(buildGridButton);
     }
 
     public void initialize()
@@ -85,8 +91,8 @@ public class StsChannelGeometryPanel extends StsJPanel
         addEndRow(channelArcRadiusDivWidthDistribBox);
         addEndRow(channelArcAngleDistribBox);
         addEndRow(channelLineLengthDivWidthDistribBox);
-        addToRow(buildButton);
-        addEndRow(buildGridButton);
+        addEndRow(buttonBox);
+        buildGridButton.setEnabled(false);
         wizard.rebuild();
     }
 
@@ -169,8 +175,13 @@ public class StsChannelGeometryPanel extends StsJPanel
             channelSet.setChannelsState(StsChannelSet.CHANNELS_ARCS);
         }
         wizard.model.enableDisplay();
+        buildButton.setEnabled(false);
+        buildGridButton.setEnabled(true);
         wizard.enableFinish();
+        StsChannelClass channelClass = (StsChannelClass)wizard.getModel().getStsClass(StsChannel.class);
+        channelClass.setDrawType(StsChannelClass.DRAW_FILLED_STRING);
         wizard.model.win3dDisplay();
+
     }
 
     public void buildGrid()

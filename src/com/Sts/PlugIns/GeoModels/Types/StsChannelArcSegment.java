@@ -185,11 +185,13 @@ public class StsChannelArcSegment extends StsChannelSegment
             StsGLDraw.drawTwoLineStrip(gl, innerPoints, outerPoints, innerPoints.length, stsColor);
             StsGLDraw.drawTwoLineStippledStrip(gl, basePoints, innerPoints, innerPoints.length, stsColor);
         }
+     /*
         else if(drawType == StsChannelClass.DRAW_GRID && channelsState == StsChannelSet.CHANNELS_GRIDS)
         {
             channelCellGrid.display(gl, stsColor, false);
             pointBarCellGrid.display(gl, stsColor, true);
         }
+    */
     }
 
     public void fillSerializableArrays(int index, byte[] segmentTypes, StsPoint[] startPoints, float[] startDirections, float[] sizes, float[] arcs)

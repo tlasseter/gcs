@@ -46,8 +46,6 @@ public class StsSegmentCellGrid extends StsRotatedGridBoundingSubBox
         StsPoint[] loopPoints;
         ArrayList<StsGridCrossingPoint> gridCrossings;
         ArrayList<StsGridCrossingPoint>[] rowArrays;
-        ArrayList<StsGridCrossingPoint>[] colArrays;
-
 
         try
         {
@@ -107,10 +105,12 @@ public class StsSegmentCellGrid extends StsRotatedGridBoundingSubBox
                 if(!isInsideRowRange(row)) continue;
                 row -= rowMin; // adjust to subBox local coors
                 int firstCol = StsMath.ceiling(point.jF);
-                if(!isInsideColRange(firstCol)) continue;
+                if(firstCol < 0) firstCol = 0;
+                // if(!isInsideColRange(firstCol)) continue;
                 firstCol -= colMin;
                 int lastCol = StsMath.floor(nextPoint.jF);
-                if(!isInsideColRange(lastCol)) continue;
+                if(lastCol > nCols - 1) lastCol = nCols - 1;
+                // if(!isInsideColRange(lastCol)) continue;
                 lastCol -= colMin;
                 try
                 {
@@ -145,16 +145,27 @@ public class StsSegmentCellGrid extends StsRotatedGridBoundingSubBox
         return loopPoints;
     }
 
+    /** for a slice plane, map the cellGrid boolean rectangle to the 2D byte array.
+     *  if a cellGris value is true, insert the channel color index.
+     *  Note that the byte array is nRows x nCols while we are filling only cell values
+     *  (nRows-1)*(nCells-1)
+     */
     public void fillData(byte[] byteData, int nChannel)
     {
         int row = 0, col = 0, r = 0, c = 0, n = 0;
-
+        int rowStart, rowEnd, colStart, colEnd;
         try
         {
-            for (row = rowMin, r = 0; row <= rowMax; row++, r++)
+            rowStart = (rowMin < 0) ? 0 : rowMin;
+            rowEnd = (rowMax > nRows-2) ? nRows-2 : rowMax;
+
+            colStart = (colMin < 0) ? 0 : colMin;
+            colEnd = (colMax > nCols-2) ? nCols-2 : colMax;
+
+            for (row = rowStart, r = rowStart - rowMin; row <= rowEnd; row++, r++)
             {
-                n = row * nCols + colMin;
-                for (col = colMin, c = 0; col <= colMax; col++, c++, n++)
+                n = row * nCols + colStart;
+                for (col = colStart, c = colStart - colMin; col <= colEnd; col++, c++, n++)
                     if (filled[r][c]) byteData[n] = (byte) nChannel;
             }
         }
@@ -164,6 +175,13 @@ public class StsSegmentCellGrid extends StsRotatedGridBoundingSubBox
         }
     }
 
+    /** for a vertical row or col plane, map the cellGrid boolean rectangle to the 2D byte array.
+     *  if a cellGris value is true, insert the channel color index.
+     *  Note that the byte array is nCols x nSlices for a row plane (the array is vertically down from the first cell and
+     *  down along each cell in the row) and nRows x nSlices for a col plane (the array is vertically down from the first cell and
+     *  down along each cell in the col).  The cell arrays\ we are filling is one less n each coordinate direction, but the single-array indexing
+     *  is over the grid array.
+     */
     public void fillData(byte[] byteData, int dir, int nPlane, StsChannel channel)
     {
         int row = 0, col = 0, r = 0, c = 0, n = 0;

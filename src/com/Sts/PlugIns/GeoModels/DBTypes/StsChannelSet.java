@@ -24,7 +24,7 @@ public class StsChannelSet extends StsRotatedGridBoundingBox implements StsTreeO
     static public byte CHANNELS_NONE = 0;
     static public byte CHANNELS_AXES = 1;
     static public byte CHANNELS_ARCS = 2;
-    static public byte CHANNELS_GRIDS = 2;
+    static public byte CHANNELS_GRIDS = 3;
 
     static public final StsFieldBean[] displayFields =
     {

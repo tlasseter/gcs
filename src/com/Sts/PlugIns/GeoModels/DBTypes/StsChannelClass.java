@@ -17,22 +17,31 @@ import java.util.Iterator;
 
 public class StsChannelClass extends StsModelObjectPanelClass implements StsSerializable, StsTreeObjectI, StsRotatedClass, StsClassDisplayable
 {
-    private boolean displayAxes = false;
-    private boolean displayAll = false;
     private boolean displayCenterLinePoints = false;
     private boolean displayChanged = false;
     private int numberInSelectedGroup = 5;
     private byte drawType = DRAW_LINES;
+    private byte drawSequence = DRAW_ALL;
 
-    static public final byte DRAW_LINES = 0;
-    static public final byte DRAW_FILLED = 1;
-    static public final byte DRAW_GRID = 2;
-    static public final byte DRAW_ZPLANE = 3;
+    /** drawType selections */
+    static public final byte DRAW_AXES = 0;
+    static public final byte DRAW_LINES = 1;
+    static public final byte DRAW_FILLED = 2;
+    static public final byte DRAW_GRID = 3;
+    static public final String DRAW_AXES_STRING = "Draw axes";
     static public final String DRAW_LINES_STRING = "Draw lines";
     static public final String DRAW_FILLED_STRING = "Draw filled";
     static public final String DRAW_GRID_STRING = "Draw grid";
+    static final String[] DRAW_TYPE_STRINGS = new String[] { DRAW_AXES_STRING, DRAW_LINES_STRING,  DRAW_FILLED_STRING, DRAW_GRID_STRING};
+
+    /** drawSequence selections */
+    static public final byte DRAW_ALL = 0;
+    static public final byte DRAW_SEQUENCE = 1;
+    static public final byte DRAW_ZPLANE = 2;
+    static public final String DRAW_ALL_STRING = "Draw all";
+    static public final String DRAW_SEQUENCE_STRING = "Draw sequence";
     static public final String DRAW_ZPLANE_STRING = "Draw Z cursor plane";
-    static final String[] DRAW_TYPE_STRINGS = new String[] { DRAW_LINES_STRING,  DRAW_FILLED_STRING, DRAW_GRID_STRING, DRAW_ZPLANE_STRING};
+    static final String[] DRAW_SEQUENCE_STRINGS = new String[] { DRAW_ALL_STRING, DRAW_SEQUENCE_STRING, DRAW_ZPLANE_STRING};
 
     public StsChannelClass() { }
 
@@ -40,11 +49,10 @@ public class StsChannelClass extends StsModelObjectPanelClass implements StsSeri
     {
         displayFields = new StsFieldBean[]
         {
-            new StsBooleanFieldBean(this, "displayAxes", "Display channel axes only"),
-            new StsBooleanFieldBean(this, "displayAll", "Display all channels."),
-            new StsBooleanFieldBean(this, "displayCenterLinePoints", "Display points"),
+            new StsComboBoxFieldBean(this, "drawType", "Display filled.", DRAW_TYPE_STRINGS),
+            new StsComboBoxFieldBean(this, "drawSequence", "Display Selection.", DRAW_SEQUENCE_STRINGS),
             new StsIntFieldBean(this, "numberInSelectedGroup", 1, 10, "Number to display"),
-            new StsComboBoxFieldBean(this, "drawType", "Display filled.", DRAW_TYPE_STRINGS)
+            new StsBooleanFieldBean(this, "displayCenterLinePoints", "Display points")
         };
     }
 
@@ -53,6 +61,52 @@ public class StsChannelClass extends StsModelObjectPanelClass implements StsSeri
         if(!super.setCurrentObject(object)) return false;
         currentModel.repaintWin3d();
         return true;
+    }
+
+    private Iterator<StsChannel> getZPlaneChannelIterator(int nSlice)
+    {
+        return new ZPlaneChannelIterator(nSlice);
+    }
+
+    public class ZPlaneChannelIterator implements Iterator<StsChannel>
+    {
+        int nSlice;
+        StsObjectList.ObjectIterator iterator;
+        StsChannel next = null;
+
+        ZPlaneChannelIterator(int nSlice)
+        {
+            this.nSlice = nSlice;
+            iterator = list.getObjectIterator();
+            next = initializeNext();
+        }
+
+        private StsChannel initializeNext()
+        {
+            while(iterator.hasNext())
+            {
+                StsChannel channel = (StsChannel) iterator.next();
+                if (channel.subBoxContainsSlice(nSlice))
+                    return channel;
+            }
+            return null;
+        }
+
+        public boolean hasNext()
+        {
+            return next != null;
+        }
+        public StsChannel next()
+        {
+            StsChannel currentNext = next;
+            next = (StsChannel) iterator.next();
+            if (!next.subBoxContainsSlice(nSlice)) next = null;
+            return currentNext;
+        }
+
+        public void remove()
+        {
+        }
     }
 
     public void displayClass(StsGLPanel3d glPanel3d, long time)
@@ -68,45 +122,44 @@ public class StsChannelClass extends StsModelObjectPanelClass implements StsSeri
             displayChanged = false;
         }
 
-        if(drawType != DRAW_ZPLANE)
+        // draw grid is done with texture rather than object drawing, so skip out
+        if(drawType == StsChannelClass.DRAW_GRID) return;
+
+        if(drawSequence == DRAW_ZPLANE)
         {
-            if (displayAll)
+            int nSlice = currentModel.getCursor3d().getCurrentGridCoordinate(StsCursor3d.ZDIR);
+            Iterator<StsChannel> iter = getZPlaneChannelIterator(nSlice);
+            while(iter.hasNext())
             {
-                Iterator iter = getVisibleObjectIterator();
-                while (iter.hasNext())
-                {
-                    StsChannel channel = (StsChannel) iter.next();
-                    channel.display(glPanel3d, displayCenterLinePoints, displayAxes, drawType);
-                }
-            } else // display only those intersected by Z cursor plane
-            {
-                int zPlane = currentModel.getCursor3d().getCurrentGridCoordinate(StsCursor3d.ZDIR);
-                StsChannel channel = (StsChannel) getCurrentObject();
-                if(channel == null) return;
-                Iterator<StsChannel> iter = getChannelGroupIterator(channel);
-                while (iter.hasNext())
-                    iter.next().display(glPanel3d, displayCenterLinePoints, displayAxes, drawType, zPlane);
+                StsChannel channel = iter.next();
+                channel.display(glPanel3d, displayCenterLinePoints, drawType);
             }
         }
+        else if (drawSequence == DRAW_ALL)
+        {
+            Iterator iter = getVisibleObjectIterator();
+            while (iter.hasNext())
+            {
+                StsChannel channel = (StsChannel) iter.next();
+                channel.display(glPanel3d, displayCenterLinePoints, drawType);
+            }
+        }
+        else if (drawSequence == DRAW_SEQUENCE)
+        {
+            int zPlane = currentModel.getCursor3d().getCurrentGridCoordinate(StsCursor3d.ZDIR);
+            StsChannel channel = (StsChannel) getCurrentObject();
+            if(channel == null) return;
+            Iterator<StsChannel> iter = getChannelGroupIterator(channel);
+            while (iter.hasNext())
+                iter.next().display(glPanel3d, displayCenterLinePoints, drawType);
+        }
     }
+
 
     private Iterator<StsChannel> getChannelGroupIterator(StsChannel channel)
     {
         int index = list.getIndex(channel);
         return list.getObjectSubsetIterator(index, numberInSelectedGroup);
-
-    }
-
-    /** if true, display only the currently selected channel; otherwise display all channels. */
-    public boolean isDisplayAll()
-    {
-        return displayAll;
-    }
-
-    public void setDisplayAll(boolean displayAll)
-    {
-        this.displayAll = displayAll;
-        currentModel.repaintWin3d();
     }
 
     public boolean isDisplayCenterLinePoints()
@@ -133,17 +186,6 @@ public class StsChannelClass extends StsModelObjectPanelClass implements StsSeri
         currentModel.repaintWin3d();
     }
 
-    public boolean isDisplayAxes()
-    {
-        return displayAxes;
-    }
-
-    public void setDisplayAxes(boolean displayAxes)
-    {
-        this.displayAxes = displayAxes;
-        currentModel.repaintWin3d();
-    }
-
     public String getDrawType()
     {
         return DRAW_TYPE_STRINGS[drawType];
@@ -160,4 +202,19 @@ public class StsChannelClass extends StsModelObjectPanelClass implements StsSeri
     }
 
     public byte getDrawTypeByte() { return drawType; }
+
+    public String getDrawSequence()
+    {
+        return DRAW_SEQUENCE_STRINGS[drawSequence];
+    }
+
+    public void setDrawSequence(String sequenceString)
+    {
+        byte drawSequence = StsParameters.getByteIndexFromString(sequenceString, DRAW_SEQUENCE_STRINGS);
+        if(this.drawSequence == drawSequence) return;
+        this.drawSequence = drawSequence;
+        currentModel.getCursor3d().textureChanged();
+        displayChanged = true;
+        currentModel.repaintWin3d();
+    }
 }

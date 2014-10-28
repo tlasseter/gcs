@@ -10,12 +10,12 @@ import com.Sts.PlugIns.GeoModels.DBTypes.StsGeoModelVolume;
  * Created by tom on 9/23/2014.
  */
 
-public class StsChannelsAxesStep extends StsWizardStep
+public class StsChannelAxesStep extends StsWizardStep
 {
     public StsChannelAxesPanel panel;
     private StsHeaderPanel header;
 
-    public StsChannelsAxesStep(StsWizard wizard)
+    public StsChannelAxesStep(StsWizard wizard)
     {
         super(wizard);
         panel = new StsChannelAxesPanel(wizard, this);
